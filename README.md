@@ -5,6 +5,7 @@
 - Alvaro Yañez  
 - Damian Vargas
 - Matias Santana
+- Kevin Sobarzo
 
 ## Indicadores [RF07]
 1. **Ocupación de trenes en tiempo real** (% de capacidad utilizada)
