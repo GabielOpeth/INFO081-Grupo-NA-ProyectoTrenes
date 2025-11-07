@@ -3,7 +3,7 @@
 ## Integrantes
 - Gabriel Rivas
 - Alvaro Yañez  
-- Damian Vargas
+- Cristian Vargas
 - Matias Santana
 - Kevin Sobarzo
 
