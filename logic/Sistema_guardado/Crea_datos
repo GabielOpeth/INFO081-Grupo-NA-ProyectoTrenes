@@ -1,0 +1,16 @@
+import json
+from logic import 
+
+class SistemaDeGuardado:
+    
+    def guardatos(self, estado_simulacion, nombre_archivo="simulacion_estado.json"):
+       
+        data_a_guardar = {
+            "hora_actual": estado_simulacion.hora_actual,
+            "trenes_activos": ["TrenA", "TrenB"], 
+            "estaciones": 5
+        }
+        
+        with open(nombre_archivo, 'w', encoding='utf-8') as archivo:
+            json.dump(data_a_guardar, archivo, indent=4)
+        print(f"Datos guardados exitosamente en {nombre_archivo}")
