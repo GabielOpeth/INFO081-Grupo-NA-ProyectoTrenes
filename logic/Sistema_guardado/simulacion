@@ -1,0 +1,7 @@
+class EstadoSimulacion:
+    def __init__(self):
+        self.hora_actual = "14:30" #hora de prueba
+
+guardador = SistemaDeGuardado()
+estado = EstadoSimulacion()
+guardador.guardar_simulacion(estado, "estado_actual.json")
