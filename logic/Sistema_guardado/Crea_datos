@@ -1,5 +1,5 @@
 import json
-from logic import 
+from datetime import datetime,time
 
 class SistemaDeGuardado:
     
@@ -7,10 +7,18 @@ class SistemaDeGuardado:
        
         data_a_guardar = {
             "hora_actual": estado_simulacion.hora_actual,
-            "trenes_activos": ["TrenA", "TrenB"], 
+            "trenes_activos": ["Tren1", "Tren2"], 
             "estaciones": 5
         }
         
         with open(nombre_archivo, 'w', encoding='utf-8') as archivo:
             json.dump(data_a_guardar, archivo, indent=4)
         print(f"Datos guardados exitosamente en {nombre_archivo}")
+
+class EstadoSimulacion:
+    def __init__(self):
+        self.hora_actual = str(datetime.now().time)
+
+guardador = SistemaDeGuardado()
+estado = EstadoSimulacion()
+guardador.guardatos(estado, "estado_actual.json")
