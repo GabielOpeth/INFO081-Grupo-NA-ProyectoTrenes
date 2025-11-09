@@ -5,7 +5,7 @@
 - Alvaro Yañez  --> YurQlito y jouleshet (Dos cuentas por probar github)
 - Cristian Vargas --> Zkyeeer
 - Matias Santana -->
-- Kevin Sobarzo -->
+- Kevin Sobarzo --> Kewinaso
 
 ## Indicadores [RF07]
 1. **Ocupación de trenes en tiempo real** (% de capacidad utilizada)
