@@ -1,11 +1,11 @@
 # 🚆INFO081-Grupo-NA-ProyectoTrenes
 
 ## Integrantes
-- Gabriel Rivas
-- Alvaro Yañez  
-- Cristian Vargas
-- Matias Santana
-- Kevin Sobarzo
+- Gabriel Rivas --> GabielOpeth
+- Alvaro Yañez  --> YurQlito y jouleshet (Dos cuentas por probar github)
+- Cristian Vargas --> Zkyeeer
+- Matias Santana -->
+- Kevin Sobarzo -->
 
 ## Indicadores [RF07]
 1. **Ocupación de trenes en tiempo real** (% de capacidad utilizada)
