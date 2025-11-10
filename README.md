@@ -17,7 +17,7 @@ El sistema guardará los datos utilizando archivos JSON a través de la clase `S
 ## Cómo Ejecutar
 Para ejecutar el programa, debe cargar el main.py, clone el repositorio y dirijase al mismo.
 ```bash
-cd INFO081-9Z-ProyectoTrenes
+cd INFO081-Grupo-NA-ProyectoTrenes
 python main.py
 
 ## Cómo ejecutar el archivo de creación de guardados
