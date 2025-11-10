@@ -4,7 +4,7 @@
 - Gabriel Rivas --> GabielOpeth
 - Alvaro Yañez  --> YurQlito y jouleshet (Dos cuentas por probar github)
 - Cristian Vargas --> Zkyeeer
-- Matias Santana -->
+- Matias Santana --> StarChaser
 - Kevin Sobarzo --> Kewinaso
 
 ## Indicadores [RF07]
@@ -18,3 +18,8 @@ El sistema guardará los datos utilizando archivos JSON a través de la clase `S
 ```bash
 cd INFO081-9Z-ProyectoTrenes
 python main.py
+
+## Cómo ejecutar el archivo de creación de guardados
+1. Ejecuta el archivo en /logic/principal.py
+2. Una vez ejecutado el archivo, usa la consola para determinar el nombre del archivo.
+Un archivo .json con el nombre de tu guardado debería aparecer en la carpeta principal.
