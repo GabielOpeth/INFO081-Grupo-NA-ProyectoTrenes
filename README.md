@@ -12,10 +12,7 @@
 2. **Tiempo promedio de espera** en estaciones
 
 ## Persistencia de Datos
-Guardaremos en formato JSON en carpeta `data/`:
-- `config_inicial.json` - Configuración base
-- `estado_simulacion.json` - Estado actual
-- `eventos.csv` - Línea temporal
+El sistema guardará los datos utilizando archivos JSON a través de la clase `SistemaGuardado` en `logic/sistema_guardado.py`. Los archivos se generarán con los nombres que el usuario especifique durante la ejecución.
 
 ## Cómo Ejecutar
 ```bash
