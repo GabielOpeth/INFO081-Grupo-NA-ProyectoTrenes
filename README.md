@@ -4,7 +4,7 @@
 - Gabriel Rivas --> GabielOpeth
 - Alvaro Yañez  --> YurQlito y jouleshet (Dos cuentas por probar github)
 - Cristian Vargas --> Zkyeeer
-- Matias Santana --> StarChaser
+- Matias Santana --> StarChaser y msantnalagos9632-creator (Dos cuentas por probar github)
 - Kevin Sobarzo --> Kewinaso
 
 ## Indicadores [RF07]
