@@ -1,10 +1,10 @@
 import tkinter as tk
 from config import configuracion as cfg
+from tkinter import messagebox
+from logic.sistema_guardado_old import SistemaDeGuardado
 
 def abrir_cargadatos(ventana_main):
-    """
-    Crea la ventana de carga como una ventana 'hija' (Toplevel).
-    """
+
     # dev msg: cambiamos por Toplevel
     carga_pantalla = tk.Toplevel(ventana_main)
     carga_pantalla.title("CARGAR DATOS")

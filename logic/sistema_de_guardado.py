@@ -27,6 +27,10 @@ class SistemaDeGuardado:
             print(f"La hora actual cargada es: {hora}")
             return datos_cargados
 
+
+# ----- Nota del desarrollador -----
+# Más adelante en la siguiente entrega, los estados de simulación se importarán desde el archivo.py
+
 class EstadoSimulacion:
     def __init__(self):
         self.hora_actual = str(datetime.now())

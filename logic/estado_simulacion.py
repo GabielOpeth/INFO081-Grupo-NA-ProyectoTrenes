@@ -1,8 +1,4 @@
-#----- AVISO IMPORTANTE -----
-#Este archivo es una versión desactualizada del archivo "principal.py" en el directorio /logic/principal.py
-#Se conserva por motivos de prueba, se recomienda usar la versión desmodularizada de este algoritmo.
-
-from .sistema_guardado import SistemaDeGuardado
+from .sistema_guardado_old import SistemaDeGuardado
 import json
 from datetime import datetime, time
 
