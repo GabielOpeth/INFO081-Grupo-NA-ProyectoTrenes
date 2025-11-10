@@ -20,6 +20,6 @@ def prueba():
     data_recuperada = guardador.cargar_simulacion(real)
 def main():
     prueba()
-
+    
 if __name__=="__main__":
     main()
