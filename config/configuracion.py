@@ -7,6 +7,10 @@ col_Boton1 = "#002afe"  # Turquesa=#7fffd4
 col_Boton2 = "Black"
 col_Defaul = "Black"
 
+# Nuevo color verde suave para el botón de acción principal
+col_Avanzar = "#b8e994"       # Verde suave
+col_Avanzar_Hover = "#78e08f" # Verde suave (oscuro)
+
 # === Fuentes (tuple) ===
 # (Se definen como tuplas: (Familia, Tamaño, Estilo))
 font_Titulo = ("arial", 20, "bold")

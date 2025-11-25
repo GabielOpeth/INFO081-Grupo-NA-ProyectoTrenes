@@ -113,8 +113,16 @@ def abrir_simulador (ventana_main):
 
     # Siguiente estado
 
-    btn_avanzar = tk.Button(sidebar, text="Avanzar Turno", font=cfg.font_Avanzar, bg="#e1e1e1", cursor="hand2")
-    btn_avanzar.pack(padx=10, pady=20, fill="x") # fill="x" hace que ocupe el ancho del panel
+    btn_avanzar = tk.Button(
+        sidebar,
+        text="Avanzar Turno",
+        font=cfg.font_Avanzar,
+        bg=cfg.col_Avanzar,
+        cursor="hand2",
+        activebackground=cfg.col_Avanzar_Hover,
+        fg="black",
+    )
+    btn_avanzar.pack(padx=10, pady=10, fill="x") # fill="x" hace que ocupe el ancho del panel
     
     # Línea Temporal
     btn_timeline = tk.Button(sidebar, text="Ver Línea Temporal", font=cfg.font_Avanzar, bg="#e1e1e1", cursor="hand2")
