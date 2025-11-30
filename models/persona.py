@@ -1,25 +1,32 @@
+# Archivo del modelo de Persona/Pasajero: persona.py
+
 class Persona:
-    def __init__(self, id, origen_id, destino_id, tiempo_llegada_simulacion, viajando=False):
+    def __init__(self, id: int, origen_id: int, destino_id: int, tiempo_llegada: dt.datetime):
         self.id = id
         self.origen_id = origen_id
         self.destino_id = destino_id
-        self.tiempo_llegada_simulacion = tiempo_llegada_simulacion
-        self.viajando = viajando
+        self.tiempo_llegada_simulacion = tiempo_llegada
+        
+        # Estados
+        self.viajando = False
         self.en_estacion = True
 
-    def __repr__(self):
-        estado = "Viajando" if self.viajando else ("En Estación" if self.en_estacion else "Terminó Viaje")
-        return f"Persona(ID: {self.id}, Origen: {self.origen_id}, Destino: {self.destino_id}, Estado: {estado})"
+    def __repr__(self) -> str:
+        hora_str = self.tiempo_llegada_simulacion.strftime("%H:%M")
+        estado = "Viajando" if self.viajando else ("En Estación" if self.en_estacion else "Terminó")
+        return f"[ID:{self.id} | {hora_str}] {self.origen_id}->{self.destino_id} ({estado})"
 
-    def dick(self):
+    def to_dict(self) -> Dict:
         return {
             "id": self.id,
             "origen_id": self.origen_id,
             "destino_id": self.destino_id,
-            "tiempo_llegada_simulacion": self.tiempo_llegada_simulacion,
+            "tiempo_llegada": self.tiempo_llegada_simulacion,
             "viajando": self.viajando,
             "en_estacion": self.en_estacion
         }
+
+#Seccion de la gestion del modelo
 
 class GestorPersonas:
     def __init__(self):

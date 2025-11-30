@@ -1,3 +1,5 @@
+#El siguiente archivo es respecto al modelo Ruta: ruta.py
+
 class Ruta:
     def __init__(self, id, origen, destino, longitud_km):
         self.id = id
@@ -10,6 +12,8 @@ class Ruta:
 
     def to_dick(self):
         return {"id": self.id, "origen": self.origen, "destino": self.destino, "longitud_km": self.longitud_km}
+
+#Seccion de la gestion del modelo.
 
 class GestorRutas:
     def __init__(self):
