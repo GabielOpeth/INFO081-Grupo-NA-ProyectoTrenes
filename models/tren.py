@@ -13,7 +13,7 @@ class Tren:
     def __repr__(self):
         return f"Tren(ID: {self.id}, {self.nombre}, {self.velocidad} km/h, Capacidad: {self.capacidad_total()})"
 
-    def dick(self):
+    def to_dict(self):
         return {"id": self.id, "velocidad": self.velocidad, "nombre": self.nombre, "vagones": self.vagones}
 
 class GestorTrenes:
