@@ -4,3 +4,6 @@
 [submodule "eventos-admin"]
 	path = eventos-admin
 	url = https://github.com/Santasy/INFO081-S2-DesCom02.git
+[submodule "INFO081-S2-DesCom02"]
+	path = INFO081-S2-DesCom02
+	url = https://github.com/Santasy/INFO081-S2-DesCom02.git
