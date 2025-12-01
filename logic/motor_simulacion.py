@@ -4,17 +4,12 @@ import sys
 import os
 import datetime as dt
 
-# =======================================================
-# 1. Ajuste de Path e Importación del Submódulo (eventos_admin)
-# =======================================================
-
-# Ajustar la ruta para encontrar los módulos en la raíz del proyecto
-# Esto es necesario si 'eventos_admin' está en la raíz y no en 'logic'.
+#
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-# --- Dependencias del Submódulo ---
+#Dependencias del Submódulo
 try:
-    # Asumimos que estas clases están en el submódulo 'eventos_admin'
+    #Clases de los submodulos
     from eventos_admin.linea_de_eventos import LineaDeEventos 
     from eventos_admin.eventos import Evento, TipoEvento
     
@@ -41,9 +36,9 @@ class MotorSimulacion:
         self.gestor_entidades = gestor_entidades
         self.estado_simulacion = estado_simulacion
 
-        # --- Inicialización Segura de Fecha ---
+        #Inicialización de Fecha 
         HORA_INICIAL_DEFAULT = "07:00:00"
-        FECHA_BASE = "01-03-2015" # Fecha del RF04
+        FECHA_BASE = "01-03-2015" # Fecha base del rf04
         FORMATO = "%d-%m-%Y %H:%M:%S"
 
         hora_str = getattr(self.estado_simulacion, 'hora_actual', HORA_INICIAL_DEFAULT)
@@ -56,15 +51,13 @@ class MotorSimulacion:
         except (ValueError, TypeError):
             fecha_inicial_dt = dt.datetime(2015, 3, 1, 7, 0, 0)
         
-        # Inicializa la línea de eventos (RF03)
+        #Inicializa la línea de eventos (parte rf03)
         self.linea_eventos = LineaDeEventos(self.estado_simulacion, fecha_inicial_dt)
         self.fecha_actual = fecha_inicial_dt
         
         print(f"Motor Inicializado. Hora de inicio: {self.fecha_actual.strftime(FORMATO)}")
 
-    # =======================================================
-    # 2. LÓGICA AUXILIAR
-    # =======================================================
+    #1 Logica del calculo
 
     def _calcular_tiempo_viaje(self, tren, ruta) -> dt.timedelta:
         """Calcula el tiempo de viaje basado en Ruta y Tren."""
@@ -74,9 +67,7 @@ class MotorSimulacion:
         segundos = tiempo_horas * 3600 
         return dt.timedelta(seconds=int(segundos))
 
-    # =======================================================
-    # 3. IMPLEMENTACIÓN DE iniciar_simulacion() (RF04)
-    # =======================================================
+    #2. Inicio de la simulacion
 
     def iniciar_simulacion(self):
         """
@@ -84,15 +75,15 @@ class MotorSimulacion:
         """
         print("--- Carga de Entidades y Eventos Iniciales ---")
         
-        # 1. Cargar Datos Iniciales (RF04)
+        #1. Cargar Datos Iniciales
         self.gestor_entidades.cargar_datos_iniciales_rf04()
         
         try:
-            # 2. Obtener entidades iniciales (asumiendo IDs)
+            #2. Obtener entidades iniciales (por id's)
             tren_inicial = self.gestor_entidades.obtener_tren("Tren_BMU")
             ruta_inicial = self.gestor_entidades.obtener_ruta("Ruta_STGO_RANCAGUA")
             
-            # 3. Programar Salida Inicial de Tren (RF03)
+            # 3. Programar salida inicial de tren
             tiempo_salida = self.fecha_actual.replace(minute=self.fecha_actual.minute + 5, second=0)
             
             primer_evento = Evento(
@@ -104,7 +95,7 @@ class MotorSimulacion:
             self.linea_eventos.insertar_evento_futuro(primer_evento)
             print(f"✅ Programado: {primer_evento.nombre} a las {primer_evento.ocurrencia.strftime('%H:%M:%S')}")
 
-            # 4. Programar Generación de Demanda Inicial (RF05)
+            # 4. Programar generaciòn de demanda inicial
             tiempo_demanda = self.fecha_actual.replace(minute=self.fecha_actual.minute + 10, second=0)
             evento_demanda = Evento(ocurrencia=tiempo_demanda, nombre="GENERAR_DEMANDA", datos={}, prioridad=5)
             self.linea_eventos.insertar_evento_futuro(evento_demanda)
@@ -113,9 +104,7 @@ class MotorSimulacion:
             print(f"⛔ ERROR: Faltan entidades iniciales para RF04. {e}. No se programaron eventos de tren.")
 
 
-    # =======================================================
-    # 4. IMPLEMENTACIÓN DE avanzar_turno() (RF03, RF02)
-    # =======================================================
+    #Funcion de avance de turno
     
     def avanzar_turno(self):
         """
@@ -123,28 +112,28 @@ class MotorSimulacion:
         Retorna: True si la GUI debe pausar (evento de tren).
         """
         
-        # 1. Obtener Eventos
+        # 1.Obtener Eventos
         eventos_a_procesar = self.linea_eventos.obtener_proximos(eliminar=False)
         
         if not eventos_a_procesar:
             return False
 
-        # 2. Consumir Eventos (Actualiza fecha, mueve al historial)
+        # 2.Consumir los eventos (actualiza fecha, mueve al historial)
         fecha_proxima = self.linea_eventos.consumir_eventos(eventos_a_procesar, historial=True)
         self.fecha_actual = fecha_proxima
         self.estado_simulacion.hora_actual = self.fecha_actual.strftime("%H:%M:%S")
         
         debe_pausar = False
         
-        # 3. Procesamiento de Lógica (Generar nuevos eventos)
+        # 3.Procesamiento de lògica (generar nuevos eventos)
         for evento in eventos_a_procesar:
             
-            # Decidir si pausar (RF03)
-            # Utilizamos getattr para obtener el valor de la enumeración TipoEvento.
+            #Decidir si pausar (o nao)
+            # Utilizamos getattr (obtencion del valor de un objeto) para obtener el valor de la enumeración TipoEvento.
             if getattr(evento, 'tipo', None) in [TipoEvento.LLEGADA_TREN, TipoEvento.SALIDA_TREN]: 
                 debe_pausar = True
 
-            # --- LÓGICA DE EVENTOS (Separación de Responsabilidades) ---
+            #Logica de eventos
             
             if evento.nombre == "SALIDA_TREN":
                 # RF02: Llama a la lógica de tu compañero para mover el tren y actualizar el estado
@@ -153,7 +142,7 @@ class MotorSimulacion:
                 
                 self.gestor_entidades.mover_tren_a_ruta(tren, ruta) 
                 
-                # Calcular y programar llegada (Tu lógica)
+                #Calcular y programar llegada
                 tiempo_viaje = self._calcular_tiempo_viaje(tren, ruta)
                 tiempo_llegada = self.fecha_actual + tiempo_viaje
                 
@@ -165,15 +154,15 @@ class MotorSimulacion:
                 self.linea_eventos.insertar_evento_futuro(evento_llegada)
                 
             elif evento.nombre == "LLEGADA_TREN":
-                # RF02: Llama a la lógica de tu compañero para procesar la llegada y el estado
+                #Llama a la logica del gestor_entidad
                 tren = self.gestor_entidades.obtener_tren(evento.datos['tren_id'])
                 estacion = self.gestor_entidades.obtener_estacion(evento.datos['estacion_destino_id'])
                 
-                self.gestor_entidades.procesar_llegada_tren(tren, estacion) # Mueve, sube/baja pasajeros, actualiza flujo
+                self.gestor_entidades.procesar_llegada_tren(tren, estacion) #Mueve, sube o baja pasajeros, actualiza flujo
                 
-                # Programar próximo evento de salida/rotación (Tu lógica)
+                #Programar proximo evento de salida/rotaciòn
                 tiempo_salida = self.fecha_actual + dt.timedelta(minutes=5)
-                proxima_ruta = self.gestor_entidades.obtener_proxima_ruta(estacion, tren) # Llama a la lógica de tu compañero
+                proxima_ruta = self.gestor_entidades.obtener_proxima_ruta(estacion, tren) #Llama a la lògica de tu compañero
                 
                 evento_salida = Evento(
                     ocurrencia=tiempo_salida, 
@@ -186,10 +175,10 @@ class MotorSimulacion:
                 # Lógica del compañero de RF05
                 self.gestor_entidades.generar_demanda(evento.datos['estacion_id'])
                 
-                # Programar el próximo evento de generación de demanda
+                #Programar el próximo evento de generación de demanda
                 tiempo_proxima_demanda = self.fecha_actual + dt.timedelta(minutes=15)
                 proximo_evento_demanda = Evento(ocurrencia=tiempo_proxima_demanda, nombre="GENERAR_DEMANDA", datos={'estacion_id': 'todas'}, prioridad=5)
                 self.linea_eventos.insertar_evento_futuro(proximo_evento_demanda)
             
-        # 4. Devolver instrucción a la GUI (RF03)
+        #4.Devolver instrucción a la Interfaz grafica (Gui)
         return debe_pausar
