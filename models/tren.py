@@ -52,3 +52,19 @@ class GestorTrenes:
 
     def obtener_todos(self):
         return list(self.trenes.values())
+
+    def modificar(self, id_tren, velocidad=None, nombre=None, vagones=None):
+        if id_tren not in self.trenes:
+            return False, "Tren no encontrado."
+        
+        tren = self.trenes[id_tren]
+        if velocidad: tren.velocidad = velocidad
+        if nombre: tren.nombre = nombre
+        if vagones: tren.vagones = vagones
+        return True, "Tren modificado."
+
+    def eliminar(self, id_tren):
+        if id_tren in self.trenes:
+            del self.trenes[id_tren]
+            return True, "Tren eliminado."
+        return False, "Tren no encontrado."
