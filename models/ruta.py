@@ -4,7 +4,6 @@ class Ruta:
         self.origen = origen
         self.destino = destino
         self.longitud_km = longitud_km
-        self.activa = True
 
     def __repr__(self):
         nom_origen = self.origen.nombre if hasattr(self.origen, 'nombre') else self.origen
@@ -14,7 +13,6 @@ class Ruta:
     def to_dict(self):
         origen_id = self.origen.id if hasattr(self.origen, 'id') else str(self.origen)
         destino_id = self.destino.id if hasattr(self.destino, 'id') else str(self.destino)
-        
         return {
             "id": self.id, 
             "origen_id": origen_id, 
@@ -39,3 +37,17 @@ class GestorRutas:
         
     def obtener_todas(self):
         return list(self.rutas.values())
+
+    def modificar(self, id_ruta, longitud_km=None):
+        if id_ruta not in self.rutas:
+            return False, "Ruta no encontrada"
+        
+        ruta = self.rutas[id_ruta]
+        if longitud_km: ruta.longitud_km = longitud_km
+        return True, "Ruta modificada"
+
+    def eliminar(self, id_ruta):
+        if id_ruta in self.rutas:
+            del self.rutas[id_ruta]
+            return True, "Ruta eliminada"
+        return False, "Ruta no encontrada"

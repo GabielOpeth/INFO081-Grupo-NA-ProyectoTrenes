@@ -39,3 +39,19 @@ class GestorEstaciones:
     
     def obtener_todas(self):
         return list(self.estaciones.values())
+
+    def modificar(self, id_estacion, nombre=None, poblacion=None, vias=None):
+        if id_estacion not in self.estaciones:
+            return False, "Estación no encontrada"
+        
+        estacion = self.estaciones[id_estacion]
+        if nombre: estacion.nombre = nombre
+        if poblacion: estacion.poblacion = poblacion
+        if vias: estacion.vias = vias
+        return True, "Estación modificada"
+
+    def eliminar(self, id_estacion):
+        if id_estacion in self.estaciones:
+            del self.estaciones[id_estacion]
+            return True, "Estación eliminada"
+        return False, "Estación no encontrada"
