@@ -35,11 +35,8 @@ class EstadoSimulacion:
 
     @staticmethod
     def from_serializable(data):
-        """
-        [RF08] Crea una instancia de EstadoSimulacion a partir de los datos cargados.
-        
-        !!! TAREA DE PERSONA 2: Lógica de Carga y Reconstrucción de Objetos !!!
-        """
+    #Crea instancia a base de datos cargados
+    #Continua Alvaro
         nuevo_estado = EstadoSimulacion()
         nuevo_estado.hora_actual = data.get("hora_actual", str(datetime.now()))
         
