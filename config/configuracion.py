@@ -1,32 +1,69 @@
-#-------Archivo de configuración en proceso de prueba
-#-------Las funciones presentadas son extremadamente simples y son solo con el fin de demostrar la configuración de variables
+class configuracion:
+    # ==========================
+    # === COLORES (Hex) ===
+    # ==========================
+    
+    # --- Fondos y Estructura ---
+    col_Bg = "White"
+    col_Bg_Sidebar = "#f0f0f0"
+    col_Bg_Modal = "#e6e6e6"
+    col_Borde = "#bdc3c7"
 
-# === Colores (hex) ===
-col_Bg = "White"
-col_Boton1 = "#002afe"  # Turquesa=#7fffd4
-col_Boton2 = "Black"
-col_Defaul = "Black"
+    # --- Botones e Interacción ---
+    col_Boton1 = "#002afe"
+    col_Boton2 = "Black"
+    col_Boton_Hover = "#4a69bd"
+    
+    # Acciones específicas
+    col_Avanzar = "#b8e994"       # Verde suave
+    col_Avanzar_Hover = "#78e08f"
+    
+    # --- Estados e Indicadores (Semáforo) ---
+    col_Success = "#27ae60"
+    col_Warning = "#f39c12"
+    col_Danger  = "#c0392b"
+    col_Neutral = "#7f8c8d"
 
-# Nuevo color verde suave para el botón de acción principal
-col_Avanzar = "#b8e994"       # Verde suave
-col_Avanzar_Hover = "#78e08f" # Verde suave (oscuro)
+    # --- Textos ---
+    col_Defaul = "Black"
+    col_Text_Sec = "#555555"
 
-# === Fuentes (tuple) ===
-# (Se definen como tuplas: (Familia, Tamaño, Estilo))
-font_Titulo = ("arial", 20, "bold")
-font_Boton = ("Arial", 12)
-font_Hora = ("Arial", 10)
-font_Avanzar = ("arial", 8)
-font_Label = ("Arial", 12)
 
-# === Tamaños (pix) ===
-# (Tamaños de ventana en "Ancho x Alto")
-size_Start = "800x350"
-size_Sim = "1024x768"
-size_Load = "400x150"
+    # ==========================
+    # === FUENTES (Tuple) ===
+    # ==========================
+    # (Familia, Tamaño, Estilo)
+    
+    # --- Títulos y Cabeceras ---
+    font_Titulo = ("Arial", 20, "bold")
+    font_Subtitulo = ("Arial", 14, "bold")
+    
+    # --- Contenido General ---
+    font_Label = ("Arial", 12)
+    font_Boton = ("Arial", 11, "bold")
+    font_Texto = ("Arial", 10)
 
-# (Tamaños de widgets)
-size_BotonST = 50
-size_BotonH = 1
-Tab_width = 1000  # Ancho del frame de la pestaña
-Tab_height = 1000 # Alto del frame de la pestaña
+    # --- Datos y Tablas ---
+    font_Hora = ("Consolas", 14, "bold")
+    font_Mono = ("Consolas", 10)
+    font_Avanzar = ("Arial", 10, "bold")
+
+
+    # ==========================
+    # === TAMAÑOS (Pix) ===
+    # ==========================
+    
+    # --- Ventanas ---
+    size_Start = "800x350"
+    size_Sim = "1024x768"
+    size_Load = "400x150"
+    size_Gestion = "600x500"
+
+    # --- Widgets y Layout ---
+    size_BotonST = 30
+    size_BotonH = 1
+    width_Sidebar = 280
+    
+    # dev note: para notebooks
+    Tab_width = 1000
+    Tab_height = 1000
