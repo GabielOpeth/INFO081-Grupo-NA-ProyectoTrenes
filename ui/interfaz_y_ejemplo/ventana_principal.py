@@ -1,5 +1,5 @@
 import tkinter as tk
-from config import configuracion as cfg
+from config.configuracion import configuracion as cfg
 from .ventana_simulador import abrir_simulador
 from .ventana_cargadatos import abrir_cargadatos
 

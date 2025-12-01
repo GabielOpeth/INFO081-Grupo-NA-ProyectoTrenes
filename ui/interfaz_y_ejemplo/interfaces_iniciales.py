@@ -2,7 +2,7 @@ import tkinter as tk
 import tkinter.ttk as ttk
 from datetime import datetime,time
 
-from config import configuracion as cfg
+from config.configuracion import configuracion as cfg
 
 
 def interfaz_simulador():

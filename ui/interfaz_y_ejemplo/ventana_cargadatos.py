@@ -1,5 +1,5 @@
 import tkinter as tk
-from config import configuracion as cfg
+from config.configuracion import configuracion as cfg
 from tkinter import messagebox
 from logic.sistema_guardado import SistemaDeGuardado
 
