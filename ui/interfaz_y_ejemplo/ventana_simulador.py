@@ -32,7 +32,7 @@ def notas(): # Notas sobre variables de referencia del archivo configuración.py
 import tkinter as tk
 import tkinter.ttk as ttk
 from datetime import datetime, time
-from config import configuracion as cfg
+from config.configuracion import configuracion as cfg
 #ventanas; carga
 from .ventana_cargadatos import abrir_cargadatos
 

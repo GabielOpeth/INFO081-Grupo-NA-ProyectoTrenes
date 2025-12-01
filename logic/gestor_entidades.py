@@ -59,11 +59,11 @@ class GestorEntidades:
         #Faltan Rutas: Santiago-Chillan, Chillan-Santiago (vía Talca y Rancagua)
         
         #3ro. Trenes (Velocidad, Nombre, Vagones)
-        #Vagones son una lista de las capacidades cuyo orden es (vagon_n, capacidad)
+        #Vagones son una lista de las capacidades cuyo orden es (Vagon_n, capacidad)
         self.gestor_trenes.crear(160, "Tren BMU", [118, 118]) # 236 pasajeros total
         self.gestor_trenes.crear(120, "Tren EMU – EFE SUR", [100, 100]) # Capacidad asumida
 
-        # Mínimos stubs para que el motor avance:
+        #Funciones de placeholder minimas
     def mover_tren_a_ruta(self, tren, ruta): pass
     def procesar_llegada_tren(self, tren, estacion): pass
     def obtener_proxima_ruta(self, estacion, tren): return self.gestor_rutas.consultar(1) # Stub
