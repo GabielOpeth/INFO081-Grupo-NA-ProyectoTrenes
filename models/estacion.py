@@ -10,7 +10,7 @@ class Estacion:
     def __repr__(self):
         return f"Estacion(ID: {self.id}, Nombre: {self.nombre}, Vias: {self.vias})"
 
-    def dick(self):
+    def dict(self):
         return {"id": self.id, "nombre": self.nombre, "poblacion": self.poblacion, "vias": self.vias}
 
 class GestorEstaciones:

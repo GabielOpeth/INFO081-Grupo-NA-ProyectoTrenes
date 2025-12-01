@@ -10,7 +10,7 @@ class Ruta:
     def __repr__(self):
         return f"Ruta(ID: {self.id}, {self.origen} -> {self.destino}, {self.longitud_km} km)"
 
-    def to_dick(self):
+    def to_dict(self):
         return {"id": self.id, "origen": self.origen, "destino": self.destino, "longitud_km": self.longitud_km}
 
 #Seccion de la gestion del modelo.
