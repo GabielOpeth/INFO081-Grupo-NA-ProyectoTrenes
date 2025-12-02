@@ -38,9 +38,9 @@ class GestorEntidades:
         return None
     
     def obtener_ruta(self, id_o_nombre):
-    #Retorna la primera ruta (ID 1), asumiendo que es la inicial (Santiago -> Rancagua)
-    #Usamos el consultar por ID, que es lo más seguro después de cargar RF04.
-    return self.gestor_rutas.consultar(1)
+        #Retorna la primera ruta (ID 1), asumiendo que es la inicial (Santiago -> Rancagua)
+        #Usamos el consultar por ID, que es lo más seguro después de cargar RF04.
+        return self.gestor_rutas.consultar(1)
 
     #Esta seccion va a cargar los datos pedidos en el Anexo 1 del proyecto
     def cargar_datos_iniciales_rf04(self):

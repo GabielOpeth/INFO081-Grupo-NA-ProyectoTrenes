@@ -1,4 +1,5 @@
-
+import datetime as dt      # <--- ESTA ES LA LÍNEA QUE TE FALTA
+from typing import Dict
 
 class Persona:
     def __init__(self, id: int, origen_id: int, destino_id: int, tiempo_llegada: dt.datetime):
