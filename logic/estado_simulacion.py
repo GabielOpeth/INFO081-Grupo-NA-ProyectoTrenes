@@ -18,7 +18,7 @@ class EstadoSimulacion:
         self.gestor_entidades = GestorEntidades()
         self.linea_eventos = []
 
-    def to_serializable(self):
+    def exportacion_de_datos(self):
         """
         [RF08] Prepara el objeto EstadoSimulacion para ser guardado como JSON.
         """

@@ -1,7 +1,8 @@
-# En logic/sistema_guardado.py
+#El presente archivo corresponde al sistema de guardado del Proyecto: sistema_guardado.py
 
 import json             #Requerido para el sistema de guardado, usa formato .json
 import datetime as dt   #Uso de las fechas.
+
 # Importamos todas las clases necesarias para reconstruir los objetos
 from .estado_simulacion import EstadoSimulacion #Importa el estado de simulacion para el uso del sistema de guardado
 from models.estacion import Estacion    #importa los modelos correspondientes a la carpeta models
@@ -14,7 +15,7 @@ class SistemaDeGuardado:
 
     def guardar_simulacion(self, estado_simulacion, nombre_archivo=None):
         #Informacion a guardar de la simulacion, en un archivo json.
-        data_a_guardar = estado_simulacion.to_serializable()
+        data_a_guardar = estado_simulacion.exportacion_de_datos()
 
         if not nombre_archivo.endswith(".json"):
             nombre_archivo += ".json"
@@ -22,7 +23,7 @@ class SistemaDeGuardado:
         with open(nombre_archivo, 'w', encoding='utf-8') as archivo:
             json.dump(data_a_guardar, archivo, indent=4, default=str) 
         
-        print(f"✅ Datos guardados exitosamente en {nombre_archivo}")
+        print(f"Datos guardados exitosamente en {nombre_archivo}")
     
     """
     Toda esta seccion sirve como base de la logica para cargar una simulacion ya guardada 
