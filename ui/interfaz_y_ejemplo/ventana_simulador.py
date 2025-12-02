@@ -1,6 +1,5 @@
 import tkinter as tk
 import tkinter.ttk as ttk
-from datetime import datetime, time
 import random
 from config.configuracion import configuracion as cfg
 from logic.sistema_guardado import SistemaDeGuardado
@@ -125,7 +124,17 @@ def abrir_simulador(ventana_main, motor_instance, estado_simulacion):
     )
     btn_avanzar.pack(padx=10, pady=10, fill="x") 
     
-    btn_timeline = tk.Button(sidebar, text="Ver Línea Temporal", font=cfg.font_Avanzar, bg="#e1e1e1", cursor="hand2")
+    def ver_linea_temporal():
+        tk.messagebox.showinfo("Línea Temporal", "Esta funcionalidad (RF09) es una mejora futura para visualizar el historial de eventos.")
+
+    btn_timeline = tk.Button(
+        sidebar,
+        text="Ver Línea Temporal",
+        font=cfg.font_Avanzar,
+        bg="#e1e1e1",
+        cursor="hand2",
+        command=ver_linea_temporal
+    )
     btn_timeline.pack(padx=10, pady=5, fill="x")
 
     frame_gestion = tk.LabelFrame(sidebar, text="Gestión de Datos", bg=cfg.col_Bg, font=("Arial", 10, "bold"))
