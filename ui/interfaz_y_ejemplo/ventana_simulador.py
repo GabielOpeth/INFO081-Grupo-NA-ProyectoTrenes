@@ -1,6 +1,7 @@
 import tkinter as tk
 import tkinter.ttk as ttk
 import random
+from datetime import datetime, time
 from config.configuracion import configuracion as cfg
 from logic.sistema_guardado import SistemaDeGuardado
 from .ventana_cargadatos import abrir_cargadatos
@@ -137,9 +138,11 @@ def abrir_simulador(ventana_main, motor_instance, estado_simulacion):
     )
     btn_timeline.pack(padx=10, pady=5, fill="x")
 
+    # --- PANEL DE GESTIÓN (RF01) ---
     frame_gestion = tk.LabelFrame(sidebar, text="Gestión de Datos", bg=cfg.col_Bg, font=("Arial", 10, "bold"))
     frame_gestion.pack(fill="x", padx=10, pady=10)
 
-    tk.Button(frame_gestion, text="Gestionar Estaciones", command=lambda: abgsen(ventana, 0)).pack(fill="x", padx=5, pady=2)
-    tk.Button(frame_gestion, text="Gestionar Trenes", command=lambda: abgsen(ventana, 1)).pack(fill="x", padx=5, pady=2)
-    tk.Button(frame_gestion, text="Gestionar Rutas", command=lambda: abgsen(ventana, 2)).pack(fill="x", padx=5, pady=2)
+    # AQUÍ PASAMOS EL GESTOR REAL: estado_simulacion.gestor_entidades
+    tk.Button(frame_gestion, text="Gestionar Estaciones", command=lambda: abgsen(ventana, estado_simulacion.gestor_entidades, 0)).pack(fill="x", padx=5, pady=2)
+    tk.Button(frame_gestion, text="Gestionar Trenes", command=lambda: abgsen(ventana, estado_simulacion.gestor_entidades, 1)).pack(fill="x", padx=5, pady=2)
+    tk.Button(frame_gestion, text="Gestionar Rutas", command=lambda: abgsen(ventana, estado_simulacion.gestor_entidades, 2)).pack(fill="x", padx=5, pady=2)

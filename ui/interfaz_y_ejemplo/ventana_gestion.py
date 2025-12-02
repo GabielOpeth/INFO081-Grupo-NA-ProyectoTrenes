@@ -2,17 +2,14 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 from config.configuracion import configuracion as cfg
 
-# Importamos los modelos reales
-from models.estacion import GestorEstaciones
-from models.tren import GestorTrenes
-from models.ruta import GestorRutas
+# Ya no necesitamos crear instancias locales vacías aquí.
+# Recibiremos el "cerebro" real como parámetro.
 
-# --- BASES DE DATOS TEMPORALES COMPARTIDAS ---
-gestor_est_local = GestorEstaciones() 
-gestor_trenes_local = GestorTrenes()
-gestor_rutas_local = GestorRutas()
-
-def abrir_gestion_entidades(parentW, tab_inicial=0):
+def abrir_gestion_entidades(parentW, gestor_entidades_principal, tab_inicial=0):
+    """
+    Ahora recibe 'gestor_entidades_principal', que es el objeto que tiene
+    los datos reales de la simulación.
+    """
 
     ventana = tk.Toplevel(parentW)
     ventana.title("Gestión de Datos del Sistema")
@@ -34,21 +31,19 @@ def abrir_gestion_entidades(parentW, tab_inicial=0):
     notebook.select(tab_inicial)
 
     # =======================================================
-    # FUNCIONES AUXILIARES (Compartidas)
+    # FUNCIONES AUXILIARES (Conectadas al Gestor Real)
     # =======================================================
     def obtener_nombres_estaciones():
-        """Devuelve una lista con los nombres de todas las estaciones para los Combobox"""
-        return [f"{e.id}-{e.nombre}" for e in gestor_est_local.obtener_todas()]
+        # Usamos gestor_entidades_principal.gestor_estaciones
+        return [f"{e.id}-{e.nombre}" for e in gestor_entidades_principal.gestor_estaciones.obtener_todas()]
 
     def refrescar_combos_rutas():
-        """Actualiza los desplegables de la pestaña Rutas"""
         lista = obtener_nombres_estaciones()
-        # Usamos try/except para evitar errores si los combos aún no se han creado
         try:
             combo_origen['values'] = lista
             combo_destino['values'] = lista
         except (NameError, UnboundLocalError):
-            pass # Si todavía no existen los widgets, no hacemos nada
+            pass 
 
     # =======================================================
     # LÓGICA: ESTACIONES
@@ -56,9 +51,10 @@ def abrir_gestion_entidades(parentW, tab_inicial=0):
     
     def actualizar_lista_estaciones():
         lista_estaciones.delete(0, tk.END)
-        for est in gestor_est_local.obtener_todas():
+        # CONEXIÓN REAL AQUÍ:
+        todas = gestor_entidades_principal.gestor_estaciones.obtener_todas()
+        for est in todas:
             lista_estaciones.insert(tk.END, f"{est.id} - {est.nombre}")
-        # ¡IMPORTANTE! Cada vez que tocamos la lista de estaciones, actualizamos las rutas
         refrescar_combos_rutas()
 
     def limpiar_campos_est():
@@ -71,7 +67,7 @@ def abrir_gestion_entidades(parentW, tab_inicial=0):
             texto = lista_estaciones.get(seleccion)
             try:
                 id_est = int(texto.split(" - ")[0])
-                obj = gestor_est_local.consultar(id_est)
+                obj = gestor_entidades_principal.gestor_estaciones.consultar(id_est)
                 if obj:
                     limpiar_campos_est()
                     entry_nombre_est.insert(0, obj.nombre)
@@ -85,17 +81,19 @@ def abrir_gestion_entidades(parentW, tab_inicial=0):
             messagebox.showwarning("Error", "Datos inválidos en Estación")
             return
         
-        gestor_est_local.crear(nombre, int(pob), {'Norte': 'Libre', 'Sur': 'Libre'})
+        # Guardamos en el gestor principal
+        gestor_entidades_principal.gestor_estaciones.crear(nombre, int(pob), {'Norte': 'Libre', 'Sur': 'Libre'})
+        
         actualizar_lista_estaciones()
         limpiar_campos_est()
-        messagebox.showinfo("Éxito", "Estación creada")
+        messagebox.showinfo("Éxito", "Estación creada y guardada en memoria.")
 
     def eliminar_estacion_click():
         sel = lista_estaciones.curselection()
         if not sel: return
         id_est = int(lista_estaciones.get(sel).split(" - ")[0])
         if messagebox.askyesno("Confirmar", "¿Eliminar estación?"):
-            gestor_est_local.eliminar(id_est)
+            gestor_entidades_principal.gestor_estaciones.eliminar(id_est)
             actualizar_lista_estaciones()
             limpiar_campos_est()
 
@@ -107,7 +105,7 @@ def abrir_gestion_entidades(parentW, tab_inicial=0):
         pob = entry_pob_est.get()
         
         if nombre and pob.isdigit():
-            gestor_est_local.modificar(id_est, nombre=nombre, poblacion=int(pob))
+            gestor_entidades_principal.gestor_estaciones.modificar(id_est, nombre=nombre, poblacion=int(pob))
             actualizar_lista_estaciones()
             limpiar_campos_est()
             messagebox.showinfo("Éxito", "Cambios guardados")
@@ -118,7 +116,7 @@ def abrir_gestion_entidades(parentW, tab_inicial=0):
 
     def actualizar_lista_trenes():
         lista_trenes.delete(0, tk.END)
-        for tren in gestor_trenes_local.obtener_todos():
+        for tren in gestor_entidades_principal.gestor_trenes.obtener_todos():
             lista_trenes.insert(tk.END, f"{tren.id} - {tren.nombre}")
 
     def limpiar_campos_tren():
@@ -132,7 +130,7 @@ def abrir_gestion_entidades(parentW, tab_inicial=0):
             texto = lista_trenes.get(sel)
             try:
                 id_tren = int(texto.split(" - ")[0])
-                obj = gestor_trenes_local.consultar(id_tren)
+                obj = gestor_entidades_principal.gestor_trenes.consultar(id_tren)
                 if obj:
                     limpiar_campos_tren()
                     entry_nom_tren.insert(0, obj.nombre)
@@ -156,7 +154,7 @@ def abrir_gestion_entidades(parentW, tab_inicial=0):
             messagebox.showwarning("Error", "Datos inválidos (Vagones ej: 100,100)")
             return
 
-        gestor_trenes_local.crear(int(vel), nombre, vagones_lista)
+        gestor_entidades_principal.gestor_trenes.crear(int(vel), nombre, vagones_lista)
         actualizar_lista_trenes()
         limpiar_campos_tren()
         messagebox.showinfo("Éxito", "Tren creado")
@@ -166,7 +164,7 @@ def abrir_gestion_entidades(parentW, tab_inicial=0):
         if not sel: return
         id_tren = int(lista_trenes.get(sel).split(" - ")[0])
         if messagebox.askyesno("Confirmar", "¿Eliminar tren?"):
-            gestor_trenes_local.eliminar(id_tren)
+            gestor_entidades_principal.gestor_trenes.eliminar(id_tren)
             actualizar_lista_trenes()
             limpiar_campos_tren()
 
@@ -179,7 +177,7 @@ def abrir_gestion_entidades(parentW, tab_inicial=0):
         vagones_lista = parsear_vagones(entry_vagones.get())
 
         if nombre and vel.isdigit() and vagones_lista:
-            gestor_trenes_local.modificar(id_tren, nombre=nombre, velocidad=int(vel), vagones=vagones_lista)
+            gestor_entidades_principal.gestor_trenes.modificar(id_tren, nombre=nombre, velocidad=int(vel), vagones=vagones_lista)
             actualizar_lista_trenes()
             limpiar_campos_tren()
             messagebox.showinfo("Éxito", "Tren actualizado")
@@ -190,7 +188,7 @@ def abrir_gestion_entidades(parentW, tab_inicial=0):
 
     def actualizar_lista_rutas():
         lista_rutas.delete(0, tk.END)
-        for ruta in gestor_rutas_local.obtener_todas():
+        for ruta in gestor_entidades_principal.gestor_rutas.obtener_todas():
             origen_nm = ruta.origen.nombre if hasattr(ruta.origen, 'nombre') else str(ruta.origen)
             destino_nm = ruta.destino.nombre if hasattr(ruta.destino, 'nombre') else str(ruta.destino)
             lista_rutas.insert(tk.END, f"{ruta.id} - {origen_nm} -> {destino_nm}")
@@ -206,15 +204,13 @@ def abrir_gestion_entidades(parentW, tab_inicial=0):
             texto = lista_rutas.get(sel)
             try:
                 id_ruta = int(texto.split(" - ")[0])
-                obj = gestor_rutas_local.consultar(id_ruta)
+                obj = gestor_entidades_principal.gestor_rutas.consultar(id_ruta)
                 if obj:
                     limpiar_campos_ruta()
-                    # Seleccionar en combos buscando el ID
                     if hasattr(obj.origen, 'id'):
                         combo_origen.set(f"{obj.origen.id}-{obj.origen.nombre}")
                     if hasattr(obj.destino, 'id'):
                         combo_destino.set(f"{obj.destino.id}-{obj.destino.nombre}")
-                    
                     entry_km.insert(0, str(obj.longitud_km))
             except ValueError: pass
 
@@ -222,7 +218,7 @@ def abrir_gestion_entidades(parentW, tab_inicial=0):
         if not texto_combo: return None
         try:
             id_est = int(texto_combo.split('-')[0])
-            return gestor_est_local.consultar(id_est)
+            return gestor_entidades_principal.gestor_estaciones.consultar(id_est)
         except: return None
 
     def crear_ruta_click():
@@ -241,7 +237,7 @@ def abrir_gestion_entidades(parentW, tab_inicial=0):
             messagebox.showwarning("Lógica", "El origen y destino no pueden ser iguales")
             return
 
-        gestor_rutas_local.crear(obj_origen, obj_destino, int(kms))
+        gestor_entidades_principal.gestor_rutas.crear(obj_origen, obj_destino, int(kms))
         actualizar_lista_rutas()
         limpiar_campos_ruta()
         messagebox.showinfo("Éxito", "Ruta creada")
@@ -251,7 +247,7 @@ def abrir_gestion_entidades(parentW, tab_inicial=0):
         if not sel: return
         id_ruta = int(lista_rutas.get(sel).split(" - ")[0])
         if messagebox.askyesno("Confirmar", "¿Eliminar ruta?"):
-            gestor_rutas_local.eliminar(id_ruta)
+            gestor_entidades_principal.gestor_rutas.eliminar(id_ruta)
             actualizar_lista_rutas()
             limpiar_campos_ruta()
 
@@ -262,7 +258,7 @@ def abrir_gestion_entidades(parentW, tab_inicial=0):
         kms = entry_km.get()
         
         if kms.isdigit():
-            gestor_rutas_local.modificar(id_ruta, longitud_km=int(kms))
+            gestor_entidades_principal.gestor_rutas.modificar(id_ruta, longitud_km=int(kms))
             actualizar_lista_rutas()
             limpiar_campos_ruta()
             messagebox.showinfo("Éxito", "Kms actualizados")
@@ -368,9 +364,4 @@ def abrir_gestion_entidades(parentW, tab_inicial=0):
     tk.Button(pnl_der_ruta, text="Guardar Cambios (Solo Kms)", command=guardar_ruta_click).pack(fill="x", pady=5)
 
     actualizar_lista_rutas()
-    
-    # -------------------------------------------------------------
-    # ¡ESTA ES LA CLAVE! 
-    # Llamamos a refrescar aquí al final para que cargue los combos
-    # -------------------------------------------------------------
     refrescar_combos_rutas()

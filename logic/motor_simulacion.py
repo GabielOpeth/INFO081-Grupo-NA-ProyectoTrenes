@@ -1,6 +1,6 @@
-# motor_simulacion.py
+# logic/motor_simulacion.py
 import datetime as dt
-import heapq # Usaremos esto para una cola de prioridad simple
+import heapq 
 
 # --- CLASES INTERNAS DE EVENTOS (Para que funcione sin dependencias externas) ---
 class TipoEvento:
@@ -22,7 +22,6 @@ class Evento:
         if nombre == "GENERAR_DEMANDA": return TipoEvento.GENERAR_DEMANDA
         return 0
 
-    # Esto permite comparar eventos por fecha (necesario para la fila)
     def __lt__(self, other):
         return self.ocurrencia < other.ocurrencia
 
@@ -38,26 +37,20 @@ class LineaDeEventosSimple:
         if not self.cola_eventos:
             return []
         
-        # Miramos el primer evento
         primer_evento = self.cola_eventos[0]
         hora_evento = primer_evento.ocurrencia
-        
-        # Sacamos todos los eventos que ocurran a esa misma hora
         eventos_a_procesar = []
         
-        # Mientras haya eventos y sean a la misma hora que el primero...
         while self.cola_eventos and self.cola_eventos[0].ocurrencia == hora_evento:
             if eliminar:
                 eventos_a_procesar.append(heapq.heappop(self.cola_eventos))
             else:
                 eventos_a_procesar.append(self.cola_eventos[0])
-                break # Si no eliminamos, solo miramos el primero para chequear
-        
+                break 
         return eventos_a_procesar
 
     def consumir_eventos(self, eventos, historial=True):
         if eventos:
-            # La nueva fecha del sistema es la fecha de estos eventos
             self.fecha_actual = eventos[0].ocurrencia
         return self.fecha_actual
 
@@ -69,30 +62,23 @@ class MotorSimulacion:
         self.gestor_entidades = gestor_entidades
         self.estado_simulacion = estado_simulacion
 
-        # Inicialización de Fecha (07:00:00)
         HORA_INICIAL_DEFAULT = "07:00:00"
         FECHA_BASE = "01-03-2015"
         FORMATO = "%d-%m-%Y %H:%M:%S"
 
         hora_str = getattr(self.estado_simulacion, 'hora_actual', HORA_INICIAL_DEFAULT)
-        # Si viene vacía o rara, forzamos default
         if not hora_str or len(hora_str) < 5: 
             hora_str = HORA_INICIAL_DEFAULT
 
-        # Intentamos armar la fecha completa
         try:
-            # Si hora_str ya trae fecha, intentamos parsear directo
             if "2015" in hora_str:
-                 fecha_inicial_dt = dt.datetime.strptime(hora_str, FORMATO) # Formato completo
+                 fecha_inicial_dt = dt.datetime.strptime(hora_str, FORMATO) 
             else:
-                 # Si solo es hora, pegamos la fecha base
                  fecha_base_str = f"{FECHA_BASE} {hora_str}"
                  fecha_inicial_dt = dt.datetime.strptime(fecha_base_str, FORMATO)
         except ValueError:
-            # Fallback seguro
             fecha_inicial_dt = dt.datetime(2015, 3, 1, 7, 0, 0)
         
-        # Usamos nuestra clase interna simple
         self.linea_eventos = LineaDeEventosSimple(fecha_inicial_dt)
         self.fecha_actual = fecha_inicial_dt
         
@@ -106,13 +92,12 @@ class MotorSimulacion:
 
     def iniciar_simulacion(self):
         print("--- Iniciando Simulación ---")
-        # 1. Asegurar datos
-        self.gestor_entidades.cargar_datos_iniciales_rf04()
+        # NOTA: Ya no cargamos datos aquí porque ventana_principal ya lo hizo.
         
         try:
-            # 2. Programar primer evento (Salida en 5 mins)
-            tren_inicial = self.gestor_entidades.obtener_tren("Tren_BMU")
-            # Obtenemos cualquier ruta válida para empezar
+            # CORRECCIÓN: Buscamos "Tren BMU" (con espacio) tal como se creó en el gestor
+            tren_inicial = self.gestor_entidades.obtener_tren("Tren BMU")
+            # Obtenemos cualquier ruta válida (ID 1)
             ruta_inicial = self.gestor_entidades.obtener_ruta(1) 
             
             if tren_inicial and ruta_inicial:
@@ -126,33 +111,27 @@ class MotorSimulacion:
                 self.linea_eventos.insertar_evento_futuro(primer_evento)
                 print(f"✅ Evento programado: SALIDA_TREN a las {tiempo_salida.time()}")
             else:
-                print("⚠️ No se encontraron trenes o rutas para iniciar eventos.")
+                print("⚠️ No se encontraron trenes o rutas para iniciar eventos (Revisa nombres en gestor_entidades).")
 
         except Exception as e:
             print(f"⛔ Error al programar eventos iniciales: {e}")
 
     def avanzar_turno(self):
-        """
-        Avanza el reloj hasta el siguiente evento y lo procesa.
-        """
-        # 1. Ver qué eventos tocan ahora
+        """Avanza el reloj hasta el siguiente evento y lo procesa."""
         eventos_a_procesar = self.linea_eventos.obtener_proximos(eliminar=True)
         
         if not eventos_a_procesar:
             print("No hay más eventos pendientes.")
             return False
 
-        # 2. Avanzar el reloj
         fecha_proxima = self.linea_eventos.consumir_eventos(eventos_a_procesar)
         self.fecha_actual = fecha_proxima
-        # Actualizamos el estado global para que la UI lo lea
         self.estado_simulacion.hora_actual = self.fecha_actual.strftime("%H:%M:%S")
         
         print(f"⏱️ Avanzando a: {self.estado_simulacion.hora_actual}")
         
         debe_pausar = False
         
-        # 3. Procesar lógica
         for evento in eventos_a_procesar:
             print(f"   Ejecutando: {evento.nombre}")
             
@@ -166,7 +145,6 @@ class MotorSimulacion:
                 if tren and ruta:
                     self.gestor_entidades.mover_tren_a_ruta(tren, ruta)
                     
-                    # Programar Llegada
                     tiempo_viaje = self._calcular_tiempo_viaje(tren, ruta)
                     tiempo_llegada = self.fecha_actual + tiempo_viaje
                     
@@ -185,8 +163,7 @@ class MotorSimulacion:
                 if tren and estacion:
                     self.gestor_entidades.procesar_llegada_tren(tren, estacion)
                     
-                    # Programar siguiente Salida (Rotación)
-                    tiempo_salida = self.fecha_actual + dt.timedelta(minutes=10) # 10 min de espera
+                    tiempo_salida = self.fecha_actual + dt.timedelta(minutes=10) 
                     proxima_ruta = self.gestor_entidades.obtener_proxima_ruta(estacion, tren)
                     
                     if proxima_ruta:
