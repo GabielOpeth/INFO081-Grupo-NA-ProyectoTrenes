@@ -1,6 +1,4 @@
-
 import json
-import datetime as dt
 from .estado_simulacion import EstadoSimulacion
 
 class SistemaDeGuardado:
@@ -10,7 +8,6 @@ class SistemaDeGuardado:
         [RF08] Guarda el estado completo en un archivo JSON.
         """
         data_a_guardar = estado_simulacion.to_serializable()
-
 
         if not nombre_archivo.endswith(".json"):
             nombre_archivo += ".json"

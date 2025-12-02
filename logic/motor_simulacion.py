@@ -1,8 +1,7 @@
-# logic/motor_simulacion.py
 import datetime as dt
 import heapq 
 
-# --- CLASES INTERNAS DE EVENTOS (Para que funcione sin dependencias externas) ---
+# --- CLASES INTERNAS DE EVENTOS ---
 class TipoEvento:
     SALIDA_TREN = 1
     LLEGADA_TREN = 2
@@ -34,145 +33,106 @@ class LineaDeEventosSimple:
         heapq.heappush(self.cola_eventos, evento)
 
     def obtener_proximos(self, eliminar=True):
-        if not self.cola_eventos:
-            return []
-        
-        primer_evento = self.cola_eventos[0]
-        hora_evento = primer_evento.ocurrencia
-        eventos_a_procesar = []
-        
-        while self.cola_eventos and self.cola_eventos[0].ocurrencia == hora_evento:
-            if eliminar:
-                eventos_a_procesar.append(heapq.heappop(self.cola_eventos))
-            else:
-                eventos_a_procesar.append(self.cola_eventos[0])
-                break 
-        return eventos_a_procesar
+        if not self.cola_eventos: return []
+        primer = self.cola_eventos[0]
+        hora = primer.ocurrencia
+        procesar = []
+        while self.cola_eventos and self.cola_eventos[0].ocurrencia == hora:
+            if eliminar: procesar.append(heapq.heappop(self.cola_eventos))
+            else: 
+                procesar.append(self.cola_eventos[0])
+                break
+        return procesar
 
     def consumir_eventos(self, eventos, historial=True):
-        if eventos:
-            self.fecha_actual = eventos[0].ocurrencia
+        if eventos: self.fecha_actual = eventos[0].ocurrencia
         return self.fecha_actual
 
-# --- CLASE MOTOR PRINCIPAL ---
+# --- MOTOR PRINCIPAL ---
 
 class MotorSimulacion:
-    
     def __init__(self, gestor_entidades, estado_simulacion):
         self.gestor_entidades = gestor_entidades
         self.estado_simulacion = estado_simulacion
-
-        HORA_INICIAL_DEFAULT = "07:00:00"
-        FECHA_BASE = "01-03-2015"
-        FORMATO = "%d-%m-%Y %H:%M:%S"
-
-        hora_str = getattr(self.estado_simulacion, 'hora_actual', HORA_INICIAL_DEFAULT)
-        if not hora_str or len(hora_str) < 5: 
-            hora_str = HORA_INICIAL_DEFAULT
-
+        
         try:
-            if "2015" in hora_str:
-                 fecha_inicial_dt = dt.datetime.strptime(hora_str, FORMATO) 
-            else:
-                 fecha_base_str = f"{FECHA_BASE} {hora_str}"
-                 fecha_inicial_dt = dt.datetime.strptime(fecha_base_str, FORMATO)
-        except ValueError:
-            fecha_inicial_dt = dt.datetime(2015, 3, 1, 7, 0, 0)
-        
-        self.linea_eventos = LineaDeEventosSimple(fecha_inicial_dt)
-        self.fecha_actual = fecha_inicial_dt
-        
-        print(f"Motor Inicializado. Hora de inicio: {self.fecha_actual}")
+            self.fecha_actual = dt.datetime(2015, 3, 1, 7, 0, 0)
+        except:
+            self.fecha_actual = dt.datetime.now()
+            
+        self.linea_eventos = LineaDeEventosSimple(self.fecha_actual)
+        print(f"Motor listo. Hora: {self.fecha_actual}")
 
     def _calcular_tiempo_viaje(self, tren, ruta) -> dt.timedelta:
-        velocidad_kmh = tren.velocidad if tren and tren.velocidad > 0 else 80 
-        tiempo_horas = ruta.longitud_km / velocidad_kmh
-        segundos = tiempo_horas * 3600 
+        vel = tren.velocidad if tren.velocidad > 0 else 80
+        segundos = (ruta.longitud_km / vel) * 3600
         return dt.timedelta(seconds=int(segundos))
 
     def iniciar_simulacion(self):
         print("--- Iniciando Simulación ---")
-        # NOTA: Ya no cargamos datos aquí porque ventana_principal ya lo hizo.
         
-        try:
-            # CORRECCIÓN: Buscamos "Tren BMU" (con espacio) tal como se creó en el gestor
-            tren_inicial = self.gestor_entidades.obtener_tren("Tren BMU")
-            # Obtenemos cualquier ruta válida (ID 1)
-            ruta_inicial = self.gestor_entidades.obtener_ruta(1) 
-            
-            if tren_inicial and ruta_inicial:
-                tiempo_salida = self.fecha_actual + dt.timedelta(minutes=5)
-                
-                primer_evento = Evento(
-                    ocurrencia=tiempo_salida, 
-                    nombre="SALIDA_TREN", 
-                    datos={'tren_id': tren_inicial.id, 'ruta': ruta_inicial, 'estacion_origen_id': ruta_inicial.origen.id}
-                )
-                self.linea_eventos.insertar_evento_futuro(primer_evento)
-                print(f"✅ Evento programado: SALIDA_TREN a las {tiempo_salida.time()}")
-            else:
-                print("⚠️ No se encontraron trenes o rutas para iniciar eventos (Revisa nombres en gestor_entidades).")
+        # 1. Programar Tren 1 (BMU) - Ida
+        tren_bmu = self.gestor_entidades.obtener_tren("Tren BMU")
+        ruta_ida = self.gestor_entidades.gestor_rutas.consultar(1) # Santiago -> Rancagua
+        
+        if tren_bmu and ruta_ida:
+            t_salida = self.fecha_actual + dt.timedelta(minutes=5)
+            self.linea_eventos.insertar_evento_futuro(Evento(t_salida, "SALIDA_TREN", 
+                {'tren_id': tren_bmu.id, 'ruta': ruta_ida, 'estacion_origen_id': ruta_ida.origen.id}))
+            print(f"✅ Tren BMU programado para {t_salida.time()}")
 
-        except Exception as e:
-            print(f"⛔ Error al programar eventos iniciales: {e}")
+        # 2. Programar Tren 2 (EMU) - Vuelta
+        tren_emu = self.gestor_entidades.obtener_tren("Tren EMU")
+        ruta_vuelta = self.gestor_entidades.gestor_rutas.consultar(2) # Rancagua -> Santiago
+        
+        if tren_emu and ruta_vuelta:
+            t_salida_2 = self.fecha_actual + dt.timedelta(minutes=20) # Sale 15 min después
+            self.linea_eventos.insertar_evento_futuro(Evento(t_salida_2, "SALIDA_TREN", 
+                {'tren_id': tren_emu.id, 'ruta': ruta_vuelta, 'estacion_origen_id': ruta_vuelta.origen.id}))
+            print(f"✅ Tren EMU programado para {t_salida_2.time()}")
+
+        # 3. Generar Demanda
+        t_demanda = self.fecha_actual + dt.timedelta(minutes=2)
+        self.linea_eventos.insertar_evento_futuro(Evento(t_demanda, "GENERAR_DEMANDA", 
+            {'estacion_id': 'todas'}, prioridad=2))
+        print(f"✅ Generación de pasajeros programada.")
 
     def avanzar_turno(self):
-        """Avanza el reloj hasta el siguiente evento y lo procesa."""
-        eventos_a_procesar = self.linea_eventos.obtener_proximos(eliminar=True)
-        
-        if not eventos_a_procesar:
-            print("No hay más eventos pendientes.")
-            return False
+        eventos = self.linea_eventos.obtener_proximos()
+        if not eventos: return False
 
-        fecha_proxima = self.linea_eventos.consumir_eventos(eventos_a_procesar)
-        self.fecha_actual = fecha_proxima
+        nueva_fecha = self.linea_eventos.consumir_eventos(eventos)
+        self.fecha_actual = nueva_fecha
         self.estado_simulacion.hora_actual = self.fecha_actual.strftime("%H:%M:%S")
         
-        print(f"⏱️ Avanzando a: {self.estado_simulacion.hora_actual}")
-        
-        debe_pausar = False
-        
-        for evento in eventos_a_procesar:
-            print(f"   Ejecutando: {evento.nombre}")
-            
-            if evento.tipo in [TipoEvento.LLEGADA_TREN, TipoEvento.SALIDA_TREN]: 
-                debe_pausar = True
+        print(f"⏱️ Hora: {self.estado_simulacion.hora_actual}")
+        pausa = False
 
-            if evento.nombre == "SALIDA_TREN":
-                tren = self.gestor_entidades.obtener_tren(evento.datos['tren_id'])
-                ruta = evento.datos['ruta']
+        for ev in eventos:
+            if ev.tipo in [1, 2]: pausa = True 
+
+            if ev.nombre == "GENERAR_DEMANDA":
+                self.gestor_entidades.generar_demanda(ev.datos['estacion_id'])
+                prox = self.fecha_actual + dt.timedelta(minutes=15)
+                self.linea_eventos.insertar_evento_futuro(Evento(prox, "GENERAR_DEMANDA", ev.datos))
+
+            elif ev.nombre == "SALIDA_TREN":
+                tren = self.gestor_entidades.obtener_tren(ev.datos['tren_id'])
+                ruta = ev.datos['ruta']
+                self.gestor_entidades.mover_tren_a_ruta(tren, ruta)
                 
-                if tren and ruta:
-                    self.gestor_entidades.mover_tren_a_ruta(tren, ruta)
-                    
-                    tiempo_viaje = self._calcular_tiempo_viaje(tren, ruta)
-                    tiempo_llegada = self.fecha_actual + tiempo_viaje
-                    
-                    nuevo_evento = Evento(
-                        ocurrencia=tiempo_llegada, 
-                        nombre="LLEGADA_TREN", 
-                        datos={'tren_id': tren.id, 'estacion_destino_id': ruta.destino.id, 'ruta': ruta}
-                    )
-                    self.linea_eventos.insertar_evento_futuro(nuevo_evento)
-                    print(f"   -> Próximo: LLEGADA a las {tiempo_llegada.time()}")
+                llegada = self.fecha_actual + self._calcular_tiempo_viaje(tren, ruta)
+                self.linea_eventos.insertar_evento_futuro(Evento(llegada, "LLEGADA_TREN", 
+                    {'tren_id': tren.id, 'estacion_destino_id': ruta.destino.id, 'ruta': ruta}))
 
-            elif evento.nombre == "LLEGADA_TREN":
-                tren = self.gestor_entidades.obtener_tren(evento.datos['tren_id'])
-                estacion = self.gestor_entidades.obtener_estacion(evento.datos['estacion_destino_id'])
+            elif ev.nombre == "LLEGADA_TREN":
+                tren = self.gestor_entidades.obtener_tren(ev.datos['tren_id'])
+                est = self.gestor_entidades.obtener_estacion(ev.datos['estacion_destino_id'])
+                self.gestor_entidades.procesar_llegada_tren(tren, est)
                 
-                if tren and estacion:
-                    self.gestor_entidades.procesar_llegada_tren(tren, estacion)
-                    
-                    tiempo_salida = self.fecha_actual + dt.timedelta(minutes=10) 
-                    proxima_ruta = self.gestor_entidades.obtener_proxima_ruta(estacion, tren)
-                    
-                    if proxima_ruta:
-                        nuevo_evento = Evento(
-                            ocurrencia=tiempo_salida, 
-                            nombre="SALIDA_TREN", 
-                            datos={'tren_id': tren.id, 'ruta': proxima_ruta, 'estacion_origen_id': estacion.id}
-                        )
-                        self.linea_eventos.insertar_evento_futuro(nuevo_evento)
-                        print(f"   -> Próximo: SALIDA a las {tiempo_salida.time()}")
+                salida = self.fecha_actual + dt.timedelta(minutes=10)
+                prox_ruta = self.gestor_entidades.obtener_proxima_ruta(est, tren)
+                self.linea_eventos.insertar_evento_futuro(Evento(salida, "SALIDA_TREN", 
+                    {'tren_id': tren.id, 'ruta': prox_ruta, 'estacion_origen_id': est.id}))
 
-        return debe_pausar
+        return pausa

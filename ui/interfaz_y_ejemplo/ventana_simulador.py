@@ -1,6 +1,5 @@
 import tkinter as tk
 import tkinter.ttk as ttk
-import random
 from datetime import datetime, time
 from config.configuracion import configuracion as cfg
 from logic.sistema_guardado import SistemaDeGuardado
@@ -100,13 +99,38 @@ def abrir_simulador(ventana_main, motor_instance, estado_simulacion):
             lbl_porcentaje.config(fg=cfg.col_Danger)
 
     def ejecutar_avance():
+        # 1. Avanzar Motor
         debe_pausar = motor_instance.avanzar_turno()
         lbl_hora.config(text=f"Hora: {estado_simulacion.hora_actual}")
 
-        ocupacion_simulada = random.uniform(0.3, 0.9) 
-        estaciones_simuladas = ["Est. Central", "Rancagua", "Talca", "Chillán"]
-        hotspot_simulado = random.choice(estaciones_simuladas)
-        actualizar_indicadores(ocupacion_simulada, hotspot_simulado)
+        # 2. CÁLCULO REAL DE INDICADORES (RF07)
+        
+        # A) Congestión (Ocupación Trenes)
+        total_capacidad = 0
+        personas_viajando = 0
+        
+        for tren in estado_simulacion.gestor_entidades.gestor_trenes.obtener_todos():
+            total_capacidad += tren.capacidad_total()
+            
+        for persona in estado_simulacion.gestor_entidades.gestor_personas.personas.values():
+            if persona.viajando:
+                personas_viajando += 1
+        
+        ocupacion = (personas_viajando / total_capacidad) if total_capacidad > 0 else 0.0
+            
+        # B) Estación Crítica (Hotspot)
+        max_espera = -1
+        nombre_hotspot = "[Ninguna]"
+        
+        for est in estado_simulacion.gestor_entidades.gestor_estaciones.obtener_todas():
+            if est.pasajeros_esperando > max_espera:
+                max_espera = est.pasajeros_esperando
+                nombre_hotspot = est.nombre
+        
+        if max_espera <= 0: nombre_hotspot = "[Ninguna]"
+
+        # 3. Actualizar UI
+        actualizar_indicadores(ocupacion, nombre_hotspot)
         
         if debe_pausar:
             lbl_status.config(text="Estado: EVENTO TREN", fg="blue")
@@ -138,11 +162,9 @@ def abrir_simulador(ventana_main, motor_instance, estado_simulacion):
     )
     btn_timeline.pack(padx=10, pady=5, fill="x")
 
-    # --- PANEL DE GESTIÓN (RF01) ---
     frame_gestion = tk.LabelFrame(sidebar, text="Gestión de Datos", bg=cfg.col_Bg, font=("Arial", 10, "bold"))
     frame_gestion.pack(fill="x", padx=10, pady=10)
 
-    # AQUÍ PASAMOS EL GESTOR REAL: estado_simulacion.gestor_entidades
     tk.Button(frame_gestion, text="Gestionar Estaciones", command=lambda: abgsen(ventana, estado_simulacion.gestor_entidades, 0)).pack(fill="x", padx=5, pady=2)
     tk.Button(frame_gestion, text="Gestionar Trenes", command=lambda: abgsen(ventana, estado_simulacion.gestor_entidades, 1)).pack(fill="x", padx=5, pady=2)
     tk.Button(frame_gestion, text="Gestionar Rutas", command=lambda: abgsen(ventana, estado_simulacion.gestor_entidades, 2)).pack(fill="x", padx=5, pady=2)
