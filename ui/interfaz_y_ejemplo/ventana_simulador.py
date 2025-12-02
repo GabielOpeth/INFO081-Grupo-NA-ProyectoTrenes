@@ -35,6 +35,7 @@ from datetime import datetime, time
 from config.configuracion import configuracion as cfg
 #ventanas; carga
 from .ventana_cargadatos import abrir_cargadatos
+from .ventana_gestion import abrir_gestion_entidades as abgsen
 
 def abrir_simulador (ventana_main):
 
@@ -246,7 +247,23 @@ def abrir_simulador (ventana_main):
             barra_congestion.configure(style="Rojo.Horizontal.TProgressbar")
             lbl_porcentaje.config(fg=cfg.col_Danger)
 
+    frame_gestion = tk.LabelFrame(sidebar, text="Gestión de Datos", bg=cfg.col_Bg, font=("Arial", 10, "bold"))
+    frame_gestion.pack(fill="x", padx=10, pady=10)
 
+    # Botón Estaciones (Abre pestaña 0)
+    tk.Button(frame_gestion, text="Gestionar Estaciones", 
+              command=lambda: abgsen(ventana, 0)
+              ).pack(fill="x", padx=5, pady=2)
+
+    # Botón Trenes (Abre pestaña 1)
+    tk.Button(frame_gestion, text="Gestionar Trenes", 
+            command=lambda: abgsen(ventana, 1)
+            ).pack(fill="x", padx=5, pady=2)
+
+    # Botón Rutas (Abre pestaña 2)
+    tk.Button(frame_gestion, text="Gestionar Rutas", 
+            command=lambda: abgsen(ventana, 2)
+            ).pack(fill="x", padx=5, pady=2)
     # =========================================================
     # 4. HERRAMIENTA DE DESARROLLO (DEV TOOL)
     # =========================================================
@@ -267,6 +284,9 @@ def abrir_simulador (ventana_main):
 
     slider_dev = tk.Scale(mainMap, from_=0.0, to=1.0, resolution=0.01, orient="horizontal", length=200, command=prueba_slider)
     slider_dev.place(relx=0.5, rely=0.90, anchor="center")
+
+
+
 
     #dev note: codigo original
     """
