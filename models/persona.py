@@ -1,4 +1,4 @@
-# Archivo del modelo de Persona/Pasajero: persona.py
+
 
 class Persona:
     def __init__(self, id: int, origen_id: int, destino_id: int, tiempo_llegada: dt.datetime):
@@ -21,7 +21,7 @@ class Persona:
             "id": self.id,
             "origen_id": self.origen_id,
             "destino_id": self.destino_id,
-            "tiempo_llegada": self.tiempo_llegada_simulacion,
+            "tiempo_llegada": self.tiempo_llegada_simulacion.isoformat(),
             "viajando": self.viajando,
             "en_estacion": self.en_estacion
         }
