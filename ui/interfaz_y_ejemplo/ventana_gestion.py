@@ -2,13 +2,11 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 from config.configuracion import configuracion as cfg
 
-# Ya no necesitamos crear instancias locales vacías aquí.
-# Recibiremos el "cerebro" real como parámetro.
+# No necesitamos instancias locales aquí, usaremos la principal
 
 def abrir_gestion_entidades(parentW, gestor_entidades_principal, tab_inicial=0):
     """
-    Ahora recibe 'gestor_entidades_principal', que es el objeto que tiene
-    los datos reales de la simulación.
+    Recibe 'gestor_entidades_principal' para editar los datos REALES.
     """
 
     ventana = tk.Toplevel(parentW)
@@ -16,7 +14,6 @@ def abrir_gestion_entidades(parentW, gestor_entidades_principal, tab_inicial=0):
     ventana.geometry(cfg.size_Gestion)
     ventana.grab_set()
 
-    # --- CONTENEDOR DE PESTAÑAS ---
     notebook = ttk.Notebook(ventana)
     notebook.pack(expand=True, fill="both", padx=10, pady=10)
 
@@ -30,11 +27,8 @@ def abrir_gestion_entidades(parentW, gestor_entidades_principal, tab_inicial=0):
 
     notebook.select(tab_inicial)
 
-    # =======================================================
-    # FUNCIONES AUXILIARES (Conectadas al Gestor Real)
-    # =======================================================
+    # --- FUNCIONES AUXILIARES ---
     def obtener_nombres_estaciones():
-        # Usamos gestor_entidades_principal.gestor_estaciones
         return [f"{e.id}-{e.nombre}" for e in gestor_entidades_principal.gestor_estaciones.obtener_todas()]
 
     def refrescar_combos_rutas():
@@ -42,18 +36,15 @@ def abrir_gestion_entidades(parentW, gestor_entidades_principal, tab_inicial=0):
         try:
             combo_origen['values'] = lista
             combo_destino['values'] = lista
-        except (NameError, UnboundLocalError):
-            pass 
+        except: pass
 
-    # =======================================================
-    # LÓGICA: ESTACIONES
-    # =======================================================
-    
+    # ==========================================
+    # PESTAÑA ESTACIONES
+    # ==========================================
     def actualizar_lista_estaciones():
         lista_estaciones.delete(0, tk.END)
-        # CONEXIÓN REAL AQUÍ:
-        todas = gestor_entidades_principal.gestor_estaciones.obtener_todas()
-        for est in todas:
+        # USAMOS EL GESTOR PRINCIPAL
+        for est in gestor_entidades_principal.gestor_estaciones.obtener_todas():
             lista_estaciones.insert(tk.END, f"{est.id} - {est.nombre}")
         refrescar_combos_rutas()
 
@@ -62,9 +53,9 @@ def abrir_gestion_entidades(parentW, gestor_entidades_principal, tab_inicial=0):
         entry_pob_est.delete(0, tk.END)
 
     def al_seleccionar_estacion(event):
-        seleccion = lista_estaciones.curselection()
-        if seleccion:
-            texto = lista_estaciones.get(seleccion)
+        sel = lista_estaciones.curselection()
+        if sel:
+            texto = lista_estaciones.get(sel)
             try:
                 id_est = int(texto.split(" - ")[0])
                 obj = gestor_entidades_principal.gestor_estaciones.consultar(id_est)
@@ -72,27 +63,27 @@ def abrir_gestion_entidades(parentW, gestor_entidades_principal, tab_inicial=0):
                     limpiar_campos_est()
                     entry_nombre_est.insert(0, obj.nombre)
                     entry_pob_est.insert(0, str(obj.poblacion))
-            except ValueError: pass
+            except: pass
 
     def crear_estacion_click():
-        nombre = entry_nombre_est.get()
-        pob = entry_pob_est.get()
-        if not nombre or not pob.isdigit():
-            messagebox.showwarning("Error", "Datos inválidos en Estación")
+        if not entry_nombre_est.get() or not entry_pob_est.get().isdigit():
+            messagebox.showwarning("Error", "Datos inválidos")
             return
         
-        # Guardamos en el gestor principal
-        gestor_entidades_principal.gestor_estaciones.crear(nombre, int(pob), {'Norte': 'Libre', 'Sur': 'Libre'})
-        
+        gestor_entidades_principal.gestor_estaciones.crear(
+            entry_nombre_est.get(), 
+            int(entry_pob_est.get()), 
+            {'Norte': 'Libre'}
+        )
         actualizar_lista_estaciones()
         limpiar_campos_est()
-        messagebox.showinfo("Éxito", "Estación creada y guardada en memoria.")
+        messagebox.showinfo("Éxito", "Estación creada")
 
     def eliminar_estacion_click():
         sel = lista_estaciones.curselection()
         if not sel: return
         id_est = int(lista_estaciones.get(sel).split(" - ")[0])
-        if messagebox.askyesno("Confirmar", "¿Eliminar estación?"):
+        if messagebox.askyesno("Confirmar", "¿Eliminar?"):
             gestor_entidades_principal.gestor_estaciones.eliminar(id_est)
             actualizar_lista_estaciones()
             limpiar_campos_est()
@@ -101,23 +92,47 @@ def abrir_gestion_entidades(parentW, gestor_entidades_principal, tab_inicial=0):
         sel = lista_estaciones.curselection()
         if not sel: return
         id_est = int(lista_estaciones.get(sel).split(" - ")[0])
-        nombre = entry_nombre_est.get()
-        pob = entry_pob_est.get()
-        
-        if nombre and pob.isdigit():
-            gestor_entidades_principal.gestor_estaciones.modificar(id_est, nombre=nombre, poblacion=int(pob))
+        if entry_pob_est.get().isdigit():
+            gestor_entidades_principal.gestor_estaciones.modificar(
+                id_est, 
+                nombre=entry_nombre_est.get(), 
+                poblacion=int(entry_pob_est.get())
+            )
             actualizar_lista_estaciones()
             limpiar_campos_est()
             messagebox.showinfo("Éxito", "Cambios guardados")
 
-    # =======================================================
-    # LÓGICA: TRENES
-    # =======================================================
+    # Layout Estaciones
+    pnl_izq_est = tk.Frame(tab_estaciones, bg=cfg.col_Bg, width=200)
+    pnl_izq_est.pack(side="left", fill="y", padx=5, pady=5)
+    tk.Label(pnl_izq_est, text="Estaciones", font=cfg.font_Boton, bg=cfg.col_Bg).pack(anchor="w")
+    lista_estaciones = tk.Listbox(pnl_izq_est, width=25)
+    lista_estaciones.pack(expand=True, fill="both", pady=5)
+    lista_estaciones.bind('<<ListboxSelect>>', al_seleccionar_estacion)
 
+    pnl_der_est = tk.Frame(tab_estaciones, bg=cfg.col_Bg)
+    pnl_der_est.pack(side="right", expand=True, fill="both", padx=10, pady=5)
+    
+    tk.Label(pnl_der_est, text="Nombre:", bg=cfg.col_Bg).pack(anchor="w")
+    entry_nombre_est = tk.Entry(pnl_der_est)
+    entry_nombre_est.pack(fill="x", pady=(0, 10))
+    tk.Label(pnl_der_est, text="Población:", bg=cfg.col_Bg).pack(anchor="w")
+    entry_pob_est = tk.Entry(pnl_der_est)
+    entry_pob_est.pack(fill="x", pady=(0, 10))
+
+    tk.Button(pnl_der_est, text="Crear Estación", bg=cfg.col_Avanzar, command=crear_estacion_click).pack(fill="x", pady=5)
+    tk.Button(pnl_der_est, text="Eliminar Estación", bg="#ffcccc", command=eliminar_estacion_click).pack(fill="x", pady=5)
+    tk.Button(pnl_der_est, text="Guardar Cambios", command=guardar_estacion_click).pack(fill="x", pady=5)
+
+    actualizar_lista_estaciones()
+
+    # ==========================================
+    # PESTAÑA TRENES
+    # ==========================================
     def actualizar_lista_trenes():
         lista_trenes.delete(0, tk.END)
-        for tren in gestor_entidades_principal.gestor_trenes.obtener_todos():
-            lista_trenes.insert(tk.END, f"{tren.id} - {tren.nombre}")
+        for t in gestor_entidades_principal.gestor_trenes.obtener_todos():
+            lista_trenes.insert(tk.END, f"{t.id} - {t.nombre}")
 
     def limpiar_campos_tren():
         entry_nom_tren.delete(0, tk.END)
@@ -135,63 +150,85 @@ def abrir_gestion_entidades(parentW, gestor_entidades_principal, tab_inicial=0):
                     limpiar_campos_tren()
                     entry_nom_tren.insert(0, obj.nombre)
                     entry_vel_tren.insert(0, str(obj.velocidad))
-                    vagones_str = ",".join(map(str, obj.vagones)) if isinstance(obj.vagones, list) else str(obj.vagones)
-                    entry_vagones.insert(0, vagones_str)
-            except ValueError: pass
-
-    def parsear_vagones(texto):
-        try:
-            return [int(x.strip()) for x in texto.split(',')]
-        except:
-            return None
+                    vag = ",".join(map(str, obj.vagones)) if isinstance(obj.vagones, list) else str(obj.vagones)
+                    entry_vagones.insert(0, vag)
+            except: pass
 
     def crear_tren_click():
-        nombre = entry_nom_tren.get()
+        nom = entry_nom_tren.get()
         vel = entry_vel_tren.get()
-        vagones_lista = parsear_vagones(entry_vagones.get())
-
-        if not nombre or not vel.isdigit() or not vagones_lista:
-            messagebox.showwarning("Error", "Datos inválidos (Vagones ej: 100,100)")
-            return
-
-        gestor_entidades_principal.gestor_trenes.crear(int(vel), nombre, vagones_lista)
-        actualizar_lista_trenes()
-        limpiar_campos_tren()
-        messagebox.showinfo("Éxito", "Tren creado")
+        vag = entry_vagones.get()
+        try:
+            vag_lista = [int(x) for x in vag.split(',')]
+            if nom and vel.isdigit():
+                gestor_entidades_principal.gestor_trenes.crear(int(vel), nom, vag_lista)
+                actualizar_lista_trenes()
+                limpiar_campos_tren()
+                messagebox.showinfo("Éxito", "Tren creado")
+        except: messagebox.showerror("Error", "Formato de vagones incorrecto (ej: 100,100)")
 
     def eliminar_tren_click():
         sel = lista_trenes.curselection()
-        if not sel: return
-        id_tren = int(lista_trenes.get(sel).split(" - ")[0])
-        if messagebox.askyesno("Confirmar", "¿Eliminar tren?"):
-            gestor_entidades_principal.gestor_trenes.eliminar(id_tren)
-            actualizar_lista_trenes()
-            limpiar_campos_tren()
+        if sel:
+            id_t = int(lista_trenes.get(sel).split(" - ")[0])
+            if messagebox.askyesno("Confirmar", "¿Eliminar?"):
+                gestor_entidades_principal.gestor_trenes.eliminar(id_t)
+                actualizar_lista_trenes()
+                limpiar_campos_tren()
 
     def guardar_tren_click():
         sel = lista_trenes.curselection()
-        if not sel: return
-        id_tren = int(lista_trenes.get(sel).split(" - ")[0])
-        nombre = entry_nom_tren.get()
-        vel = entry_vel_tren.get()
-        vagones_lista = parsear_vagones(entry_vagones.get())
+        if sel:
+            id_t = int(lista_trenes.get(sel).split(" - ")[0])
+            try:
+                vag_lista = [int(x) for x in entry_vagones.get().split(',')]
+                gestor_entidades_principal.gestor_trenes.modificar(
+                    id_t, 
+                    nombre=entry_nom_tren.get(),
+                    velocidad=int(entry_vel_tren.get()),
+                    vagones=vag_lista
+                )
+                actualizar_lista_trenes()
+                limpiar_campos_tren()
+                messagebox.showinfo("Éxito", "Actualizado")
+            except: pass
 
-        if nombre and vel.isdigit() and vagones_lista:
-            gestor_entidades_principal.gestor_trenes.modificar(id_tren, nombre=nombre, velocidad=int(vel), vagones=vagones_lista)
-            actualizar_lista_trenes()
-            limpiar_campos_tren()
-            messagebox.showinfo("Éxito", "Tren actualizado")
+    # Layout Trenes
+    pnl_izq_tren = tk.Frame(tab_trenes, bg=cfg.col_Bg, width=200)
+    pnl_izq_tren.pack(side="left", fill="y", padx=5, pady=5)
+    tk.Label(pnl_izq_tren, text="Trenes", font=cfg.font_Boton, bg=cfg.col_Bg).pack(anchor="w")
+    lista_trenes = tk.Listbox(pnl_izq_tren, width=25)
+    lista_trenes.pack(expand=True, fill="both", pady=5)
+    lista_trenes.bind('<<ListboxSelect>>', al_seleccionar_tren)
 
-    # =======================================================
-    # LÓGICA: RUTAS
-    # =======================================================
+    pnl_der_tren = tk.Frame(tab_trenes, bg=cfg.col_Bg)
+    pnl_der_tren.pack(side="right", expand=True, fill="both", padx=10, pady=5)
+    
+    tk.Label(pnl_der_tren, text="Nombre:", bg=cfg.col_Bg).pack(anchor="w")
+    entry_nom_tren = tk.Entry(pnl_der_tren)
+    entry_nom_tren.pack(fill="x")
+    tk.Label(pnl_der_tren, text="Velocidad:", bg=cfg.col_Bg).pack(anchor="w")
+    entry_vel_tren = tk.Entry(pnl_der_tren)
+    entry_vel_tren.pack(fill="x")
+    tk.Label(pnl_der_tren, text="Vagones (100,100):", bg=cfg.col_Bg).pack(anchor="w")
+    entry_vagones = tk.Entry(pnl_der_tren)
+    entry_vagones.pack(fill="x", pady=(0,10))
 
+    tk.Button(pnl_der_tren, text="Crear Tren", bg=cfg.col_Avanzar, command=crear_tren_click).pack(fill="x", pady=5)
+    tk.Button(pnl_der_tren, text="Eliminar Tren", bg="#ffcccc", command=eliminar_tren_click).pack(fill="x", pady=5)
+    tk.Button(pnl_der_tren, text="Guardar Cambios", command=guardar_tren_click).pack(fill="x", pady=5)
+
+    actualizar_lista_trenes()
+
+    # ==========================================
+    # PESTAÑA RUTAS
+    # ==========================================
     def actualizar_lista_rutas():
         lista_rutas.delete(0, tk.END)
-        for ruta in gestor_entidades_principal.gestor_rutas.obtener_todas():
-            origen_nm = ruta.origen.nombre if hasattr(ruta.origen, 'nombre') else str(ruta.origen)
-            destino_nm = ruta.destino.nombre if hasattr(ruta.destino, 'nombre') else str(ruta.destino)
-            lista_rutas.insert(tk.END, f"{ruta.id} - {origen_nm} -> {destino_nm}")
+        for r in gestor_entidades_principal.gestor_rutas.obtener_todas():
+            o = r.origen.nombre if hasattr(r.origen, 'nombre') else "?"
+            d = r.destino.nombre if hasattr(r.destino, 'nombre') else "?"
+            lista_rutas.insert(tk.END, f"{r.id} - {o} -> {d}")
 
     def limpiar_campos_ruta():
         combo_origen.set('')
@@ -203,163 +240,72 @@ def abrir_gestion_entidades(parentW, gestor_entidades_principal, tab_inicial=0):
         if sel:
             texto = lista_rutas.get(sel)
             try:
-                id_ruta = int(texto.split(" - ")[0])
-                obj = gestor_entidades_principal.gestor_rutas.consultar(id_ruta)
+                id_r = int(texto.split(" - ")[0])
+                obj = gestor_entidades_principal.gestor_rutas.consultar(id_r)
                 if obj:
                     limpiar_campos_ruta()
-                    if hasattr(obj.origen, 'id'):
-                        combo_origen.set(f"{obj.origen.id}-{obj.origen.nombre}")
-                    if hasattr(obj.destino, 'id'):
-                        combo_destino.set(f"{obj.destino.id}-{obj.destino.nombre}")
+                    if hasattr(obj.origen, 'nombre'): combo_origen.set(f"{obj.origen.id}-{obj.origen.nombre}")
+                    if hasattr(obj.destino, 'nombre'): combo_destino.set(f"{obj.destino.id}-{obj.destino.nombre}")
                     entry_km.insert(0, str(obj.longitud_km))
-            except ValueError: pass
-
-    def obtener_estacion_desde_combo(texto_combo):
-        if not texto_combo: return None
-        try:
-            id_est = int(texto_combo.split('-')[0])
-            return gestor_entidades_principal.gestor_estaciones.consultar(id_est)
-        except: return None
+            except: pass
 
     def crear_ruta_click():
-        txt_origen = combo_origen.get()
-        txt_destino = combo_destino.get()
-        kms = entry_km.get()
-
-        obj_origen = obtener_estacion_desde_combo(txt_origen)
-        obj_destino = obtener_estacion_desde_combo(txt_destino)
-
-        if not obj_origen or not obj_destino or not kms.isdigit():
-            messagebox.showwarning("Error", "Selecciona origen/destino válidos y kms numéricos")
-            return
-        
-        if obj_origen.id == obj_destino.id:
-            messagebox.showwarning("Lógica", "El origen y destino no pueden ser iguales")
-            return
-
-        gestor_entidades_principal.gestor_rutas.crear(obj_origen, obj_destino, int(kms))
-        actualizar_lista_rutas()
-        limpiar_campos_ruta()
-        messagebox.showinfo("Éxito", "Ruta creada")
+        try:
+            id_o = int(combo_origen.get().split('-')[0])
+            id_d = int(combo_destino.get().split('-')[0])
+            kms = int(entry_km.get())
+            
+            obj_o = gestor_entidades_principal.gestor_estaciones.consultar(id_o)
+            obj_d = gestor_entidades_principal.gestor_estaciones.consultar(id_d)
+            
+            if obj_o and obj_d:
+                gestor_entidades_principal.gestor_rutas.crear(obj_o, obj_d, kms)
+                actualizar_lista_rutas()
+                limpiar_campos_ruta()
+                messagebox.showinfo("Éxito", "Ruta creada")
+        except: messagebox.showerror("Error", "Selecciona origen/destino válidos")
 
     def eliminar_ruta_click():
         sel = lista_rutas.curselection()
-        if not sel: return
-        id_ruta = int(lista_rutas.get(sel).split(" - ")[0])
-        if messagebox.askyesno("Confirmar", "¿Eliminar ruta?"):
-            gestor_entidades_principal.gestor_rutas.eliminar(id_ruta)
-            actualizar_lista_rutas()
-            limpiar_campos_ruta()
+        if sel:
+            id_r = int(lista_rutas.get(sel).split(" - ")[0])
+            if messagebox.askyesno("Confirmar", "¿Eliminar?"):
+                gestor_entidades_principal.gestor_rutas.eliminar(id_r)
+                actualizar_lista_rutas()
+                limpiar_campos_ruta()
 
     def guardar_ruta_click():
         sel = lista_rutas.curselection()
-        if not sel: return
-        id_ruta = int(lista_rutas.get(sel).split(" - ")[0])
-        kms = entry_km.get()
-        
-        if kms.isdigit():
-            gestor_entidades_principal.gestor_rutas.modificar(id_ruta, longitud_km=int(kms))
-            actualizar_lista_rutas()
-            limpiar_campos_ruta()
-            messagebox.showinfo("Éxito", "Kms actualizados")
+        if sel:
+            id_r = int(lista_rutas.get(sel).split(" - ")[0])
+            if entry_km.get().isdigit():
+                gestor_entidades_principal.gestor_rutas.modificar(id_r, longitud_km=int(entry_km.get()))
+                actualizar_lista_rutas()
+                limpiar_campos_ruta()
+                messagebox.showinfo("Éxito", "Kms actualizados")
 
-
-    # =======================================================
-    # DISEÑO PESTAÑA 1: ESTACIONES
-    # =======================================================
-    pnl_izq_est = tk.Frame(tab_estaciones, bg=cfg.col_Bg, width=200)
-    pnl_izq_est.pack(side="left", fill="y", padx=5, pady=5)
-    tk.Label(pnl_izq_est, text="Estaciones", font=("Arial", 10, "bold"), bg=cfg.col_Bg).pack(anchor="w")
-    lista_estaciones = tk.Listbox(pnl_izq_est, width=25)
-    lista_estaciones.pack(expand=True, fill="both", pady=5)
-    lista_estaciones.bind('<<ListboxSelect>>', al_seleccionar_estacion)
-    
-    pnl_der_est = tk.Frame(tab_estaciones, bg=cfg.col_Bg)
-    pnl_der_est.pack(side="right", expand=True, fill="both", padx=10, pady=5)
-
-    tk.Label(pnl_der_est, text="Nombre:", bg=cfg.col_Bg).pack(anchor="w")
-    entry_nombre_est = tk.Entry(pnl_der_est)
-    entry_nombre_est.pack(fill="x", pady=(0, 10))
-
-    tk.Label(pnl_der_est, text="Población:", bg=cfg.col_Bg).pack(anchor="w")
-    entry_pob_est = tk.Entry(pnl_der_est)
-    entry_pob_est.pack(fill="x", pady=(0, 10))
-
-    tk.Button(pnl_der_est, text="Configurar Vías", bg="#e1e1e1").pack(fill="x", pady=(0, 10))
-    
-    tk.Label(pnl_der_est, text="Generador de Demanda:", bg=cfg.col_Bg).pack(anchor="w")
-    ttk.Combobox(pnl_der_est, values=["Base"], state="readonly").pack(fill="x", pady=(0, 20))
-
-    tk.Button(pnl_der_est, text="Crear Estación", bg=cfg.col_Avanzar, font=cfg.font_Boton, command=crear_estacion_click).pack(fill="x", pady=5)
-    tk.Button(pnl_der_est, text="Eliminar Estación", bg="#ffcccc", command=eliminar_estacion_click).pack(fill="x", pady=5)
-    tk.Button(pnl_der_est, text="Guardar Cambios", command=guardar_estacion_click).pack(fill="x", pady=5)
-
-    actualizar_lista_estaciones()
-
-    # =======================================================
-    # DISEÑO PESTAÑA 2: TRENES
-    # =======================================================
-    pnl_izq_tren = tk.Frame(tab_trenes, bg=cfg.col_Bg, width=200)
-    pnl_izq_tren.pack(side="left", fill="y", padx=5, pady=5)
-    
-    tk.Label(pnl_izq_tren, text="Trenes", font=("Arial", 10, "bold"), bg=cfg.col_Bg).pack(anchor="w")
-    lista_trenes = tk.Listbox(pnl_izq_tren, width=25)
-    lista_trenes.pack(expand=True, fill="both", pady=5)
-    lista_trenes.bind('<<ListboxSelect>>', al_seleccionar_tren)
-
-    pnl_der_tren = tk.Frame(tab_trenes, bg=cfg.col_Bg)
-    pnl_der_tren.pack(side="right", expand=True, fill="both", padx=10, pady=5)
-
-    tk.Label(pnl_der_tren, text="Nombre del Tren:", bg=cfg.col_Bg).pack(anchor="w")
-    entry_nom_tren = tk.Entry(pnl_der_tren)
-    entry_nom_tren.pack(fill="x", pady=(0, 10))
-
-    tk.Label(pnl_der_tren, text="Velocidad (km/h):", bg=cfg.col_Bg).pack(anchor="w")
-    entry_vel_tren = tk.Entry(pnl_der_tren)
-    entry_vel_tren.pack(fill="x", pady=(0, 10))
-    
-    tk.Label(pnl_der_tren, text="Vagones (Lista ej: 100,100):", bg=cfg.col_Bg).pack(anchor="w")
-    entry_vagones = tk.Entry(pnl_der_tren)
-    entry_vagones.pack(fill="x", pady=(0, 10))
-
-    tk.Label(pnl_der_tren, text="Flujo Acumulado (Lectura):", bg=cfg.col_Bg).pack(anchor="w")
-    entry_flujo = tk.Entry(pnl_der_tren, bg="#eeeeee")
-    entry_flujo.insert(0, "0")
-    entry_flujo.config(state="readonly")
-    entry_flujo.pack(fill="x", pady=(0, 20))
-
-    tk.Button(pnl_der_tren, text="Crear Tren", bg=cfg.col_Avanzar, font=cfg.font_Boton, command=crear_tren_click).pack(fill="x", pady=5)
-    tk.Button(pnl_der_tren, text="Eliminar Tren", bg="#ffcccc", command=eliminar_tren_click).pack(fill="x", pady=5)
-    tk.Button(pnl_der_tren, text="Guardar Cambios", command=guardar_tren_click).pack(fill="x", pady=5)
-
-    actualizar_lista_trenes()
-
-    # =======================================================
-    # DISEÑO PESTAÑA 3: RUTAS
-    # =======================================================
+    # Layout Rutas
     pnl_izq_ruta = tk.Frame(tab_rutas, bg=cfg.col_Bg, width=200)
     pnl_izq_ruta.pack(side="left", fill="y", padx=5, pady=5)
-    tk.Label(pnl_izq_ruta, text="Rutas", font=("Arial", 10, "bold"), bg=cfg.col_Bg).pack(anchor="w")
+    tk.Label(pnl_izq_ruta, text="Rutas", font=cfg.font_Boton, bg=cfg.col_Bg).pack(anchor="w")
     lista_rutas = tk.Listbox(pnl_izq_ruta, width=25)
     lista_rutas.pack(expand=True, fill="both", pady=5)
     lista_rutas.bind('<<ListboxSelect>>', al_seleccionar_ruta)
 
     pnl_der_ruta = tk.Frame(tab_rutas, bg=cfg.col_Bg)
     pnl_der_ruta.pack(side="right", expand=True, fill="both", padx=10, pady=5)
-
-    tk.Label(pnl_der_ruta, text="Estación de Origen:", bg=cfg.col_Bg).pack(anchor="w")
+    
+    tk.Label(pnl_der_ruta, text="Origen:", bg=cfg.col_Bg).pack(anchor="w")
     combo_origen = ttk.Combobox(pnl_der_ruta, state="readonly")
-    combo_origen.pack(fill="x", pady=(0, 10))
-
-    tk.Label(pnl_der_ruta, text="Estación de Destino:", bg=cfg.col_Bg).pack(anchor="w")
+    combo_origen.pack(fill="x")
+    tk.Label(pnl_der_ruta, text="Destino:", bg=cfg.col_Bg).pack(anchor="w")
     combo_destino = ttk.Combobox(pnl_der_ruta, state="readonly")
-    combo_destino.pack(fill="x", pady=(0, 10))
-
-    tk.Label(pnl_der_ruta, text="Longitud (kms):", bg=cfg.col_Bg).pack(anchor="w")
+    combo_destino.pack(fill="x")
+    tk.Label(pnl_der_ruta, text="Kms:", bg=cfg.col_Bg).pack(anchor="w")
     entry_km = tk.Entry(pnl_der_ruta)
-    entry_km.pack(fill="x", pady=(0, 20))
+    entry_km.pack(fill="x", pady=(0,10))
 
-    tk.Button(pnl_der_ruta, text="Crear Ruta", bg=cfg.col_Avanzar, font=cfg.font_Boton, command=crear_ruta_click).pack(fill="x", pady=5)
+    tk.Button(pnl_der_ruta, text="Crear Ruta", bg=cfg.col_Avanzar, command=crear_ruta_click).pack(fill="x", pady=5)
     tk.Button(pnl_der_ruta, text="Eliminar Ruta", bg="#ffcccc", command=eliminar_ruta_click).pack(fill="x", pady=5)
     tk.Button(pnl_der_ruta, text="Guardar Cambios (Solo Kms)", command=guardar_ruta_click).pack(fill="x", pady=5)
 
