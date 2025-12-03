@@ -26,28 +26,29 @@ class GestorEntidades:
         return None
     
     def obtener_ruta(self, id_ruta):
-        # Corrección: Ahora busca la ruta real por ID
+        #Busca la ruta por el id
         return self.gestor_rutas.consultar(id_ruta)
 
     def cargar_datos_iniciales_rf04(self):
-        print("Cargando datos iniciales (RF04)...")
-        # 1. Estaciones
+        #En esta seccion se cargan los datos correspondientes al Anexo 1
+        print("Cargando datos iniciales...")
+        #Estaciones
         stgo = self.gestor_estaciones.crear("Estación Central", 8000000, {'Norte': 'Libre'})
         rancagua = self.gestor_estaciones.crear("Rancagua", 250000, {'Norte': 'Libre'})
         talca = self.gestor_estaciones.crear("Talca", 240000, {'Norte': 'Libre'})
         chillan = self.gestor_estaciones.crear("Chillán", 200000, {'Norte': 'Libre'})
         
-        # 2. Rutas
-        self.gestor_rutas.crear(stgo, rancagua, 87) # ID 1
-        self.gestor_rutas.crear(rancagua, stgo, 87) # ID 2
+        #Rutas
+        self.gestor_rutas.crear(stgo, rancagua, 87) #id 1
+        self.gestor_rutas.crear(rancagua, stgo, 87) #id 2
         self.gestor_rutas.crear(rancagua, talca, 150)
         self.gestor_rutas.crear(talca, chillan, 100)
         
-        # 3. Trenes
+        #Trenes
         self.gestor_trenes.crear(160, "Tren BMU", [100, 100]) 
         self.gestor_trenes.crear(120, "Tren EMU", [80, 80]) 
 
-    # --- LÓGICA DE MOVIMIENTO Y PERSONAS ---
+    #Logica del movimieno y personas
 
     def mover_tren_a_ruta(self, tren, ruta):
         tren.ruta_actual = ruta
@@ -57,13 +58,13 @@ class GestorEntidades:
         tren.ruta_actual = None
         tren.ubicacion_actual = estacion
         
-        # 1. Bajar Pasajeros
+        #Para bajar Pasajeros
         for p in self.gestor_personas.personas.values():
             if p.viajando: 
                 p.viajando = False
                 p.en_estacion = False
         
-        # 2. Subir Pasajeros
+        #Para subir Pasajeros
         capacidad = tren.capacidad_total()
         esperando = estacion.pasajeros_esperando
         suben = min(esperando, capacidad)
@@ -78,7 +79,7 @@ class GestorEntidades:
                 p.en_estacion = False
                 contador += 1
                 
-        print(f"   🚉 {tren.nombre} en {estacion.nombre}: Bajaron todos, subieron {suben}.")
+        print(f"{tren.nombre} en {estacion.nombre}: Bajaron todos, subieron {suben}.")
 
     def obtener_proxima_ruta(self, estacion, tren): 
         todas = self.gestor_rutas.obtener_todas()
@@ -88,7 +89,7 @@ class GestorEntidades:
         return self.gestor_rutas.consultar(1)
         
     def generar_demanda(self, estacion_id): 
-        """Crea personas aleatorias en las estaciones"""
+        """Crea una cantidad aleatoria de personas en las estaciones"""
         estaciones_destino = self.gestor_estaciones.obtener_todas()
         targets = self.gestor_estaciones.obtener_todas() if estacion_id == 'todas' else [self.gestor_estaciones.consultar(estacion_id)]
         
@@ -98,7 +99,7 @@ class GestorEntidades:
             cantidad = random.randint(5, 15)
             total_nuevos += cantidad
             
-            for _ in range(cantidad):
+            for x in range(cantidad):
                 destino = random.choice(estaciones_destino)
                 while destino.id == est.id and len(estaciones_destino) > 1:
                     destino = random.choice(estaciones_destino)
@@ -106,4 +107,4 @@ class GestorEntidades:
                 self.gestor_personas.crear(est.id, destino.id, dt.datetime.now())
                 est.pasajeros_esperando += 1
         
-        print(f"   👥 Se generaron {total_nuevos} nuevos pasajeros esperando.")
+        print(f"Se generaron {total_nuevos} nuevos pasajeros esperando.")
