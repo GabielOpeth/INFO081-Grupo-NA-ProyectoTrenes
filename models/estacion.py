@@ -1,3 +1,4 @@
+#Clase del modelo en concreto
 class Estacion:
     def __init__(self, id, nombre, poblacion, vias):
         self.id = id
@@ -22,6 +23,7 @@ class Estacion:
             "pasajeros_esperando": self.pasajeros_esperando
         }
 
+#Gestor de la clase en si
 class GestorEstaciones:
     def __init__(self):
         self.estaciones = {} 
