@@ -1,5 +1,4 @@
-import datetime as dt      # <--- ESTA ES LA LÍNEA QUE TE FALTA
-from typing import Dict
+import datetime as dt
 
 class Persona:
     def __init__(self, id: int, origen_id: int, destino_id: int, tiempo_llegada: dt.datetime):
@@ -8,7 +7,7 @@ class Persona:
         self.destino_id = destino_id
         self.tiempo_llegada_simulacion = tiempo_llegada
         
-        # Estados
+        #Estados de la clase
         self.viajando = False
         self.en_estacion = True
 
@@ -17,7 +16,7 @@ class Persona:
         estado = "Viajando" if self.viajando else ("En Estación" if self.en_estacion else "Terminó")
         return f"[ID:{self.id} | {hora_str}] {self.origen_id}->{self.destino_id} ({estado})"
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "id": self.id,
             "origen_id": self.origen_id,
