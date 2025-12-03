@@ -96,7 +96,7 @@ class MotorSimulacion:
             t_salida = self.fecha_actual + dt.timedelta(minutes=5)
             self.linea_eventos.insertar_evento_futuro(Evento(t_salida, "SALIDA_TREN", 
                 {'tren_id': tren_bmu.id, 'ruta': ruta_ida, 'estacion_origen_id': ruta_ida.origen.id}))
-            print(f"✅ Tren BMU programado para {t_salida.time()}")
+            print(f"Tren BMU programado para {t_salida.time()}")
 
         #2: tren 2 EMU de Vuelta
         tren_emu = self.gestor_entidades.obtener_tren("Tren EMU")
@@ -106,13 +106,13 @@ class MotorSimulacion:
             t_salida_2 = self.fecha_actual + dt.timedelta(minutes=20) #Sale 20 minutos despues
             self.linea_eventos.insertar_evento_futuro(Evento(t_salida_2, "SALIDA_TREN", 
                 {'tren_id': tren_emu.id, 'ruta': ruta_vuelta, 'estacion_origen_id': ruta_vuelta.origen.id}))
-            print(f"✅ Tren EMU programado para {t_salida_2.time()}")
+            print(f"Tren EMU programado para {t_salida_2.time()}")
 
         #Generacion de demanda
         t_demanda = self.fecha_actual + dt.timedelta(minutes=2)
         self.linea_eventos.insertar_evento_futuro(Evento(t_demanda, "GENERAR_DEMANDA", 
             {'estacion_id': 'todas'}, prioridad=2))
-        print(f"✅ Generación de pasajeros programada.")
+        print(f"Generación de pasajeros programada.")
 
     #Esta funcion ejecuta un a logica de simulacpon por turnos
     def avanzar_turno(self):

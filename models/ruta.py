@@ -1,3 +1,4 @@
+#Clase del modelo en concreto
 class Ruta:
     def __init__(self, id, origen, destino, longitud_km):
         self.id = id
@@ -19,7 +20,7 @@ class Ruta:
             "destino_id": destino_id, 
             "longitud_km": self.longitud_km
         }
-
+#Gestor de la clase en si
 class GestorRutas:
     def __init__(self):
         self.rutas = {}      

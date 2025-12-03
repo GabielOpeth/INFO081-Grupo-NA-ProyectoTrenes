@@ -1,3 +1,4 @@
+#Clase del modelo en concrteo
 class Tren:
     def __init__(self, id, velocidad, nombre, vagones):
         self.id = id
@@ -34,7 +35,7 @@ class Tren:
             "ubicacion_actual": ub_data,
             "distancia_recorrida": self.distancia_recorrida_ruta
         }
-
+#Gestor de la clase en si
 class GestorTrenes:
     def __init__(self):
         self.trenes = {}      

@@ -1,7 +1,5 @@
 class configuracion:
-    # ==========================
-    # === COLORES (Hex) ===
-    # ==========================
+    #Colores en hexadecimal
     
     # --- Fondos y Estructura ---
     col_Bg = "White"
@@ -24,46 +22,42 @@ class configuracion:
     col_Danger  = "#c0392b"
     col_Neutral = "#7f8c8d"
 
-    # --- Textos ---
+    #Textos
     col_Defaul = "Black"
     col_Text_Sec = "#555555"
 
 
-    # ==========================
-    # === FUENTES (Tuple) ===
-    # ==========================
-    # (Familia, Tamaño, Estilo)
+    #Fuentes
+    #Orden: (Familia, Tamaño, Estilo)
     
-    # --- Títulos y Cabeceras ---
+    #-Titulos y cabeceras
     font_Titulo = ("Arial", 20, "bold")
     font_Subtitulo = ("Arial", 14, "bold")
     
-    # --- Contenido General ---
+    #General
     font_Label = ("Arial", 12)
     font_Boton = ("Arial", 11, "bold")
     font_Texto = ("Arial", 10)
 
-    # --- Datos y Tablas ---
+    #Datos y tablas
     font_Hora = ("Consolas", 14, "bold")
     font_Mono = ("Consolas", 10)
     font_Avanzar = ("Arial", 10, "bold")
 
 
-    # ==========================
-    # === TAMAÑOS (Pix) ===
-    # ==========================
+    #Tamaños en pixeles
     
-    # --- Ventanas ---
+    #Tamaño definido a ventanas
     size_Start = "800x350"
     size_Sim = "1024x768"
     size_Load = "400x150"
     size_Gestion = "600x500"
 
-    # --- Widgets y Layout ---
+    #Widgets y layout
     size_BotonST = 30
     size_BotonH = 1
     width_Sidebar = 280
     
-    # dev note: para notebooks
+    #Nota, para los note
     Tab_width = 1000
     Tab_height = 1000
