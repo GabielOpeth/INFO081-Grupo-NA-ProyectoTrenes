@@ -56,7 +56,7 @@ def abrir_simulador(ventana_main, motor_instance, estado_simulacion):
     lbl_status = tk.Label(frame_info, text="Estado: EN ESPERA", font=("Arial", 10), fg="orange", bg=cfg.col_Bg, anchor="w")
     lbl_status.pack(fill="x", padx=5, pady=2)
 
-    frame_ind = tk.LabelFrame(sidebar, text="Indicadores (RF07)", bg=cfg.col_Bg, font=("Arial", 10, "bold"))
+    frame_ind = tk.LabelFrame(sidebar, text="Indicadores utiles", bg=cfg.col_Bg, font=("Arial", 10, "bold"))
     frame_ind.pack(fill="x", padx=10, pady=20) 
 
     tk.Label(frame_ind, text="Congestión de Vías:", bg=cfg.col_Bg, font=cfg.font_Label).pack(anchor="w", padx=5, pady=(5,0))
@@ -103,7 +103,7 @@ def abrir_simulador(ventana_main, motor_instance, estado_simulacion):
         debe_pausar = motor_instance.avanzar_turno()
         lbl_hora.config(text=f"Hora: {estado_simulacion.hora_actual}")
 
-        # 2. CÁLCULO REAL DE INDICADORES (RF07)
+        # 2. CÁLCULO REAL DE INDICADORES 
         
         # A) Congestión (Ocupación Trenes)
         total_capacidad = 0
@@ -118,7 +118,7 @@ def abrir_simulador(ventana_main, motor_instance, estado_simulacion):
         
         ocupacion = (personas_viajando / total_capacidad) if total_capacidad > 0 else 0.0
             
-        # B) Estación Crítica (Hotspot)
+        # B) Estación Crítica
         max_espera = -1
         nombre_hotspot = "[Ninguna]"
         

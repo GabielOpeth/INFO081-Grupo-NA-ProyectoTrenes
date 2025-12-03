@@ -193,7 +193,7 @@ def abrir_gestion_entidades(parentW, gestor_entidades_principal, tab_inicial=0):
                 messagebox.showinfo("Éxito", "Actualizado")
             except: pass
 
-    # Layout Trenes
+    # Organizador Trenes
     pnl_izq_tren = tk.Frame(tab_trenes, bg=cfg.col_Bg, width=200)
     pnl_izq_tren.pack(side="left", fill="y", padx=5, pady=5)
     tk.Label(pnl_izq_tren, text="Trenes", font=cfg.font_Boton, bg=cfg.col_Bg).pack(anchor="w")
@@ -284,7 +284,7 @@ def abrir_gestion_entidades(parentW, gestor_entidades_principal, tab_inicial=0):
                 limpiar_campos_ruta()
                 messagebox.showinfo("Éxito", "Kms actualizados")
 
-    # Layout Rutas
+    # Organizador Rutas
     pnl_izq_ruta = tk.Frame(tab_rutas, bg=cfg.col_Bg, width=200)
     pnl_izq_ruta.pack(side="left", fill="y", padx=5, pady=5)
     tk.Label(pnl_izq_ruta, text="Rutas", font=cfg.font_Boton, bg=cfg.col_Bg).pack(anchor="w")
