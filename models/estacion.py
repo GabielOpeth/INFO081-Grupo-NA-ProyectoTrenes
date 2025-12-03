@@ -1,3 +1,6 @@
+from ppdc_timed_generator.generadores import GeneradorUniforme #
+from datetime import datetime, time
+
 #Clase del modelo en concreto
 class Estacion:
     def __init__(self, id, nombre, poblacion, vias):
@@ -9,6 +12,14 @@ class Estacion:
         self.andenes_ocupados = 0
         self.flujo_acumulado = 0
         self.pasajeros_esperando = 0
+
+        self.generador = GeneradorUniforme(
+            poblacion, 
+            seed=123, 
+            fecha_inicial=datetime.now(), 
+            hora_apertura=time(7, 0), 
+            hora_cierre=time(20, 0)
+        )
 
     def __repr__(self):
         return f"Estacion({self.nombre} | ID:{self.id})"

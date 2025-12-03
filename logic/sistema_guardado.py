@@ -39,12 +39,10 @@ class SistemaDeGuardado:
         except FileNotFoundError:
             raise FileNotFoundError(f"Archivo '{nombre_archivo}' no encontrado.")   #Evita que el programa caiga al no hallar archivo
             
-        print(f" Archivo leído. Iniciando reconstrucción del estado...")
-        
+        print(f"Archivo leído. Iniciando reconstrucción del estado...")
         #Declaracion de un nuevo estado, que, basicamente, sea la reconstruccion de lo guardado en el json
         nuevo_estado = self.reconstruccion_del_guardado_json(datos_cargados)
-        
-        print(f" Estado reconstruido exitosamente. Hora: {nuevo_estado.hora_actual}")
+        print(f"Estado reconstruido exitosamente. Hora: {nuevo_estado.hora_actual}")
         return nuevo_estado
 
     #Directamente relacionada al Sistema de Guardado, recoge los datos del json basicamente

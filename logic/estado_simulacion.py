@@ -16,12 +16,12 @@ class EstadoSimulacion:
     def __init__(self):
         self.hora_actual = str(datetime.now().strftime("%H:%M:%S"))
         self.gestor_entidades = GestorEntidades()
-        self.linea_eventos = []
+        self.debe_pausar = False
 
     def exportacion_de_datos(self):
-        """
-        [RF08] Prepara el objeto EstadoSimulacion para ser guardado como JSON.
-        """
+
+        #Prepara el objeto EstadoSimulacion para ser guardado como json.
+
         return {
             "hora_actual": self.hora_actual,
             "entidades": {
@@ -30,5 +30,6 @@ class EstadoSimulacion:
                 "trenes": [t.to_dict() for t in self.gestor_entidades.gestor_trenes.obtener_todos()],
                 "personas": [p.to_dict() for p in self.gestor_entidades.gestor_personas.personas.values()] 
             },
-            "eventos": self.linea_eventos 
+            # Se devuelve una lista vacía ya que LineaDeEventos del submódulo no está diseñado para serializar eventos futuros de esta manera.
+            "eventos": [] 
         }

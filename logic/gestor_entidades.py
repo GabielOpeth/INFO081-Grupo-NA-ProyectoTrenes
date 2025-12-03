@@ -48,7 +48,6 @@ class GestorEntidades:
         self.gestor_trenes.crear(160, "Tren BMU", [100, 100]) 
         self.gestor_trenes.crear(120, "Tren EMU", [80, 80]) 
 
-    #Logica del movimieno y personas
 
     def mover_tren_a_ruta(self, tren, ruta):
         tren.ruta_actual = ruta
@@ -58,13 +57,10 @@ class GestorEntidades:
         tren.ruta_actual = None
         tren.ubicacion_actual = estacion
         
-        #Para bajar Pasajeros
         for p in self.gestor_personas.personas.values():
-            if p.viajando: 
-                p.viajando = False
-                p.en_estacion = False
+            if p.viajando and p.destino_id == estacion.id:
+                self.gestor_personas.modificar_estado(p.id, viajando=False, en_estacion=False)
         
-        #Para subir Pasajeros
         capacidad = tren.capacidad_total()
         esperando = estacion.pasajeros_esperando
         suben = min(esperando, capacidad)
@@ -74,9 +70,9 @@ class GestorEntidades:
         contador = 0
         for p in self.gestor_personas.personas.values():
             if contador >= suben: break
+            
             if p.origen_id == estacion.id and p.en_estacion:
-                p.viajando = True
-                p.en_estacion = False
+                self.gestor_personas.modificar_estado(p.id, viajando=True, en_estacion=False)
                 contador += 1
                 
         print(f"{tren.nombre} en {estacion.nombre}: Bajaron todos, subieron {suben}.")
@@ -89,22 +85,34 @@ class GestorEntidades:
         return self.gestor_rutas.consultar(1)
         
     def generar_demanda(self, estacion_id): 
-        """Crea una cantidad aleatoria de personas en las estaciones"""
-        estaciones_destino = self.gestor_estaciones.obtener_todas()
+        """Crea una cantidad de personas en las estaciones usando GeneradorUniforme."""
+
+        MINUTOS_A_GENERAR = 15 
+        
         targets = self.gestor_estaciones.obtener_todas() if estacion_id == 'todas' else [self.gestor_estaciones.consultar(estacion_id)]
         
         total_nuevos = 0
         for est in targets:
             if not est: continue
-            cantidad = random.randint(5, 15)
-            total_nuevos += cantidad
             
-            for x in range(cantidad):
+            estaciones_destino = self.gestor_estaciones.obtener_todas()
+
+            def persona_factory(id_generado: int, fecha_creacion: dt.datetime):
                 destino = random.choice(estaciones_destino)
                 while destino.id == est.id and len(estaciones_destino) > 1:
                     destino = random.choice(estaciones_destino)
                 
-                self.gestor_personas.crear(est.id, destino.id, dt.datetime.now())
-                est.pasajeros_esperando += 1
+                return self.gestor_personas.crear(est.id, destino.id, fecha_creacion)
+            
+            nuevos_pasajeros = est.generador.generar_clientes(
+                MINUTOS_A_GENERAR, 
+                persona_factory, 
+                update=True
+            )
+            
+            cantidad_generada = len(nuevos_pasajeros)
+            total_nuevos += cantidad_generada
+            
+            est.pasajeros_esperando += cantidad_generada
         
         print(f"Se generaron {total_nuevos} nuevos pasajeros esperando.")
