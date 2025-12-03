@@ -1,4 +1,5 @@
 import datetime as dt
+#se importa la herramienta de tiempo(reloj y calendario).
 from ppdc_event_manager import TipoEvento, Evento, LineaDeEventos #
 #Algunas clases internas de eventos
 class TipoEvento:
@@ -8,11 +9,11 @@ class TipoEvento:
 
 class Evento:
     def __init__(self, ocurrencia, nombre, datos, prioridad=1):
-        self.ocurrencia = ocurrencia
-        self.nombre = nombre
-        self.datos = datos
-        self.prioridad = prioridad
-        self.tipo = self._asignar_tipo(nombre)
+        self.ocurrencia = ocurrencia #¿Cuando va a pasar?
+        self.nombre = nombre #¿Que va a pasar?
+        self.datos = datos #Informacion(Que tren, que estacion, etc)
+        self.prioridad = prioridad #Si dos eventos ocurren al mismo tiempo, ¿A cual se le da prioridad?
+        self.tipo = self._asignar_tipo(nombre) #Etiqueta numerica
 
     def _asignar_tipo(self, nombre):
         if nombre == "SALIDA_TREN": return TipoEvento.SALIDA_TREN
@@ -62,10 +63,15 @@ class MotorSimulacion:
         self.gestor_entidades = gestor_entidades
         self.estado_simulacion = estado_simulacion
         
+        #inicilización del reloj interno
         try:
             self.fecha_actual = dt.datetime(2015, 3, 1, 7, 0, 0)
         except:
             self.fecha_actual = dt.datetime.now()
+
+        #Linea de eventos:
+        #Cola de prioridad de eventos futuros
+        #Simulación discreta de evento.
             
         self.linea_eventos = LineaDeEventos(self.estado_simulacion, self.fecha_actual) 
         print(f"Motor listo. Hora: {self.fecha_actual}")
@@ -74,9 +80,15 @@ class MotorSimulacion:
         vel = tren.velocidad if tren.velocidad > 0 else 80
         segundos = (ruta.longitud_km / vel) * 3600
         return dt.timedelta(seconds=int(segundos))
+    
+    #Formula usada, tiempo = distancia/velocidad.
+    #Se asume que la velocidad es constante durante el viaje
 
     
     def _handle_generar_demanda(self, datos):
+        #Funcion hecha para generar pasajeros
+        #Crea entidades de pasajeros en las estaciones
+        #Se agenda a si mismo cada 15 minutos para repetir el bucle de manera infinita.
         """Logica: loop de generacion de demanda. Debe reprogramar el proximo evento."""
         
         self.gestor_entidades.generar_demanda(datos['estacion_id'])
@@ -88,6 +100,10 @@ class MotorSimulacion:
         )
 
     def _handle_salida_tren(self, datos):
+
+        #Evento recurrente:
+        #Este evento genera la demanda y ademas
+        #perpetua en el ciclo.
         """Logica: salida del tren. Crea el evento de llegada y pausa la simulación."""
         tren = self.gestor_entidades.obtener_tren(datos['tren_id'])
         ruta = datos['ruta']
@@ -109,6 +125,10 @@ class MotorSimulacion:
         self.estado_simulacion.debe_pausar = True
 
     def _handle_llegada_tren(self, datos):
+        #Funcion(El tren llega)
+        #Baja y sube gente(Gestor)
+        #Decide proxima ruta
+        #Anota en la agenda la siguiente salida
         """Logica: llegada del tren. Crea el evento de proxima salida y pausa la simulación."""
         tren = self.gestor_entidades.obtener_tren(datos['tren_id'])
         est = self.gestor_entidades.obtener_estacion(datos['estacion_destino_id'])
@@ -132,6 +152,8 @@ class MotorSimulacion:
         self.estado_simulacion.debe_pausar = True
 
     def iniciar_simulacion(self):
+        #Busca los trenes y sus rutas iniciales
+        #Primera generacion de pasajeros
         print("Iniciando Simulación...")
         
         tren_bmu = self.gestor_entidades.obtener_tren("Tren BMU")
@@ -167,6 +189,10 @@ class MotorSimulacion:
         print(f"Generación de pasajeros programada.")
 
     def avanzar_turno(self):
+        #Paso del tiempo en la simulación
+        #Mira la agenda de eventos y ejecuta el de mayor prioridad
+        #Adelante la simulacion hasta el siguiente evento
+        #Ejecuta el evento
         self.estado_simulacion.debe_pausar = False 
         
         eventos = self.linea_eventos.obtener_proximos()
